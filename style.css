@@ -39,12 +39,12 @@ body.light-mode {
 
 /* Dark Mode */
 body.dark-mode {
-  background-color: #121723;
+  background-color: black;
   color: #ffffff;
 }
 
 .navbar.dark-mode {
-  background-color: #121723;
+  background-color: black;
 }
 
 .navbar.dark-mode .navbar-brand {
