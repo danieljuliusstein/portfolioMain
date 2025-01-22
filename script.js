@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const burgerIcon = document.getElementById('burger-icon');
   const body = document.body;
   const headerActions = document.querySelector('.header-actions');
+  const dropdownMenu = document.getElementById('dropdown-menu');
 
   // Check for saved theme in localStorage
   const savedTheme = localStorage.getItem('theme');
@@ -24,8 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Toggle navigation menu on burger icon click
+  // Toggle dropdown menu on burger icon click
   burgerIcon.addEventListener('click', () => {
     headerActions.classList.toggle('open');
+    dropdownMenu.classList.toggle('show');
   });
 });

@@ -3,6 +3,7 @@
   --highlight-blue: #00bcd4;
 }
 
+/* General Styles */
 .burger-icon {
   display: none;
   font-size: 30px;
@@ -12,11 +13,29 @@
   cursor: pointer;
 }
 
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 60px; /* Adjust this based on your header's height */
+  right: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  padding: 10px 20px;
+  z-index: 999;
+  text-align: center;
+  min-width: 200px;
+}
+
+.nav-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 @media (max-width: 768px) {
   .nav-buttons {
     display: none; /* Hide navigation links by default */
-    flex-direction: column;
-    gap: 10px;
   }
 
   .burger-icon {
@@ -26,7 +45,27 @@
   .header-actions.open .nav-buttons {
     display: flex; /* Show the menu when clicked */
   }
+
+  .dropdown-menu {
+    display: block; /* Show dropdown menu when toggled */
+  }
+
+  .header-actions.open .dropdown-menu {
+    display: block;
+  }
+
+  /* Optional animation for sliding the dropdown */
+  .dropdown-menu {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .header-actions.open .dropdown-menu {
+    opacity: 1;
+  }
 }
+
+
 
 html, body {
   margin: 0;
