@@ -39,6 +39,11 @@
   display: flex; /* Show the dropdown when toggled */
 }
 
+.header-actions .nav-buttons {
+  display: flex; /* Ensure the navigation links are displayed by default */
+  gap: 20px;
+}
+
 @media (max-width: 768px) {
   /* Display burger icon on mobile screens */
   .burger-icon {
@@ -47,10 +52,12 @@
     border: none;
   }
 
+  /* Hide original navigation on mobile screens */
   .header-actions .nav-buttons {
-    display: none; /* Hide original navigation on mobile */
+    display: none;
   }
 }
+
 
 
 
@@ -266,4 +273,87 @@ body.dark-mode {
   color: var(--highlight-blue);
   font-size: 24px;
   margin: 10px 0;
+}
+/* Contact Section */
+.contact-section {
+  padding: 50px;
+  background-color: inherit; /* Inherit the background color from body */
+  text-align: center;
+}
+
+.contact-card {
+  background: rgba(255, 255, 255, 0.1); /* Transparent background */
+  backdrop-filter: blur(10px); /* Blurred background */
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.contact-card h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+
+.contact-card .seperator {
+  color: var(--highlight-blue);
+  font-size: 24px;
+  margin: 10px 0;
+}
+
+/* Form Input Styles */
+.contact-card form input,
+.contact-card form textarea {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 16px;
+  background-color: #fff;
+  color: #333;
+  transition: border 0.3s ease;
+}
+
+.contact-card form input:focus,
+.contact-card form textarea:focus {
+  border: 1px solid var(--highlight-blue); /* Highlight border on focus */
+  outline: none;
+}
+
+/* Submit Button */
+.contact-card form button {
+  background-color: var(--highlight-blue);
+  color: white;
+  font-size: 16px;
+  padding: 15px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.contact-card form button:hover {
+  transform: scale(1.05);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .contact-section {
+    padding: 30px;
+  }
+
+  .contact-card {
+    padding: 20px;
+    width: 90%;
+  }
+
+  .contact-card h2 {
+    font-size: 24px;
+  }
+
+  .contact-card .seperator {
+    font-size: 20px;
+  }
 }
