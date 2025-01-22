@@ -23,15 +23,39 @@ html, body {
   transition: background-color 0.3s, color 0.3s;
 }
 
+/* Light Mode */
 body.light-mode {
-  background-color: white;
-  color: black;
+  background-color: #ffffff;
+  color: #000000;
 }
 
-body.dark-mode {
-  background-color: black;
-  color: white;
+.navbar.light-mode {
+  background-color: #f8f9fa;
 }
+
+.navbar.light-mode .navbar-brand {
+  color: #000000;
+}
+
+/* Dark Mode */
+body.dark-mode {
+  background-color: #121723;
+  color: #ffffff;
+}
+
+.navbar.dark-mode {
+  background-color: #121723;
+}
+
+.navbar.dark-mode .navbar-brand {
+  color: #ffffff;
+}
+
+/* Toggle Button */
+#theme-toggle {
+  margin-left: auto;
+}
+
 
 /* Header Bar */
 .headerBar {
