@@ -28,10 +28,12 @@ body.light-mode {
   color: black;
 }
 
-body.dark-mode {
-  background-color: black;
+body.dark-mode input, 
+body.dark-mode textarea {
+  background-color: #333;
   color: white;
 }
+
 
 /* Header Bar */
 .headerBar {
