@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width">
+    <meta charset="utf-8">
+    <title>Contact Me - Daniel Stein</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <!-- Header Bar -->
+    <div class="headerBar">
+        <div class="name-display">
+            D<span class="j">J</span>S
+        </div>
+
+        <div class="header-actions">
+            <div class="nav-buttons">
+              <a href="index.html" class="nav-link">Home</a>
+              <a href="portfolio.html" class="nav-link">Portfolio</a>
+              <a href="resume.html" class="nav-link">Resume</a>
+            </div>
+            <a href="contact.html" class="contact-button">Contact Me</a>
+
+            <button id="theme-toggle" class="nav-link">☀︎ / ⏾</button>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1 class="main-title">Get in Touch</h1>
+        <p class="subtitle">I'd love to hear from you!</p>
+    </section>
+
+    <!-- Contact Form Section -->
+    <section class="contact-section">
+        <div class="contact-card">
+            <h2>Contact Me</h2>
+            <div class="seperator">━━</div>
+            <form action="https://api.web3forms.com/submit" method="POST">
+
+                <input type="hidden" name="access_key" value="5b818263-9372-4771-a1e5-cf363350a6c5">
+            
+                <input type="text" name="name" required placeholder="Enter your name">
+                <input type="email" name="email" required placeholder="Enter your email">
+                <textarea name="message" required placeholder="Enter your message"></textarea>
+
+                <input type="hidden" name="redirect" value="https://web3forms.com/success">
+                <button type="submit">Submit Form</button>
+            
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer">
+            <a href="https://github.com/danieljuliusstein" target="_blank" class="icon-link">GitHub</a>
+            <a href="https://replit.com/@Daniel-SteinSte" target="_blank" class="icon-link">Replit</a>
+            <a href="mailto:danieljuliusstein@gmail.com" target="_blank" class="icon-link">Email</a>
+            <a href="https://www.linkedin.com/in/daniel-stein-8a36b8276/" target="_blank" class="icon-link">LinkedIn</a>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+
+</html>
