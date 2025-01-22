@@ -1,9 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const themeToggle = document.getElementById('theme-toggle');
-  const burgerIcon = document.getElementById('burger-icon');
   const body = document.body;
-  const headerActions = document.querySelector('.header-actions');
-  const dropdownMenu = document.getElementById('dropdown-menu');
 
   // Check for saved theme in localStorage
   const savedTheme = localStorage.getItem('theme');
@@ -25,9 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Toggle dropdown menu on burger icon click
+  // Burger menu functionality
+  const burgerIcon = document.getElementById('burger-icon');
+  const dropdownMenu = document.getElementById('dropdown-menu');
+
   burgerIcon.addEventListener('click', () => {
-    headerActions.classList.toggle('open');
-    dropdownMenu.classList.toggle('show');
+    dropdownMenu.classList.toggle('show'); // Toggle the visibility of the dropdown menu
   });
 });

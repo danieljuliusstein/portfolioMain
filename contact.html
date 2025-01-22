@@ -7,7 +7,6 @@
     <title>Daniel Stein Portfolio</title>
     <link href="style.css" rel="stylesheet" type="text/css" />
     <meta name="description" content="Daniel Stein's portfolio showcasing computer engineering projects, resume, and contact information.">
-
 </head>
 
 <body>
@@ -17,17 +16,19 @@
         <div class="name-display">
           D<span class="j">J</span>S
         </div>
-        
-        
 
         <!-- Navigation and Theme Toggle -->
         <div class="header-actions">
-            <div class="nav-buttons">
-              <a href="index.html" class="nav-link">Home</a>
-              <a href="portfolio.html" class="nav-link">Portfolio</a>
-              <a href="resume.html" class="nav-link">Resume</a>
+            <!-- Burger Icon -->
+            <button id="burger-icon" class="burger-icon" aria-label="Toggle menu">☰</button>
+
+            <!-- Dropdown Menu -->
+            <div id="dropdown-menu" class="dropdown-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="portfolio.html" class="nav-link">Portfolio</a>
+                <a href="resume.html" class="nav-link">Resume</a>
+                <a href="contact.html" class="contact-button">Contact Me</a>
             </div>
-            <a href="contact.html" class="contact-button">Contact Me</a>
 
             <button id="theme-toggle" class="nav-link" aria-label="Toggle theme">⏾</button>
         </div>
