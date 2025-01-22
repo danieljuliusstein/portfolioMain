@@ -3,6 +3,18 @@
   --highlight-blue: #00bcd4; /* Your custom blue color */
 }
 
+@media (max-width: 768px) {
+  .nav-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .hero {
+    padding: 20px;
+    height: auto;
+  }
+}
+
+
 html, body {
   margin: 0;
   padding: 0;

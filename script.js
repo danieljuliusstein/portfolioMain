@@ -15,7 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
       body.classList.toggle('dark-mode');
       
       // Save theme preference in localStorage
-      const currentTheme = body.classList.contains('light-mode') ? 'light-mode' : 'dark-mode';
-      localStorage.setItem('theme', currentTheme);
+      const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      body.classList.add(savedTheme || (prefersDarkScheme ? 'dark-mode' : 'light-mode'));
+
   });
 });
