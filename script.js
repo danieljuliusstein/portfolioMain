@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   const themeToggle = document.getElementById('theme-toggle');
+  const burgerIcon = document.getElementById('burger-icon');
   const body = document.body;
+  const headerActions = document.querySelector('.header-actions');
 
   // Check for saved theme in localStorage
   const savedTheme = localStorage.getItem('theme');
@@ -20,5 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       localStorage.setItem('theme', 'light-mode');
     }
+  });
+
+  // Toggle navigation menu on burger icon click
+  burgerIcon.addEventListener('click', () => {
+    headerActions.classList.toggle('open');
   });
 });
