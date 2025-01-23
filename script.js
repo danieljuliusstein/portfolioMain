@@ -21,12 +21,4 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('theme', 'light-mode');
     }
   });
-
-  // Burger menu functionality
-  const burgerIcon = document.getElementById('burger-icon');
-  const dropdownMenu = document.getElementById('dropdown-menu');
-
-  burgerIcon.addEventListener('click', () => {
-    dropdownMenu.classList.toggle('show'); // Toggle the visibility of the dropdown menu
-  });
 });
