@@ -3,18 +3,6 @@
   --highlight-blue: #00bcd4;
 }
 
-@media (max-width: 768px) {
-  .nav-buttons {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .hero {
-    padding: 20px;
-    height: auto;
-  }
-}
-
 html, body {
   margin: 0;
   padding: 0;
@@ -33,15 +21,7 @@ body.dark-mode {
   color: #ffffff;
 }
 
-#theme-toggle {
-  margin-left: auto;
-  background: none;
-  border: none;
-  color: inherit;
-  font-size: 18px;
-  cursor: pointer;
-}
-
+/* Header */
 .headerBar {
   display: flex;
   justify-content: space-between;
@@ -54,38 +34,67 @@ body.dark-mode {
   z-index: 1000;
 }
 
-.name-display {
-  font-size: 18px;
-  font-weight: bold;
-  color: inherit;
-  letter-spacing: 1px;
-}
-
-.name-display span.j {
-  color: var(--highlight-blue);
-}
-
-.header-actions {
+/* Contact Section */
+.contact-section {
+  padding: 50px 20px;
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 15px;
+  flex-direction: column;
+  background-color: inherit; 
 }
 
-.nav-buttons {
-  display: flex;
-  gap: 15px;
+.contact-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: left;
 }
 
-.nav-link {
-  text-decoration: none;
-  color: inherit;
-  font-size: 16px;
-  padding: 10px 15px;
-  transition: color 0.3s;
+.contact-card h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
 }
 
-.nav-link:hover {
+.contact-card .seperator {
   color: var(--highlight-blue);
+  font-size: 24px;
+  margin: 10px 0;
+}
+
+.contact-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contact-card input,
+.contact-card textarea {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.contact-card button {
+  background-color: var(--highlight-blue);
+  color: white;
+  padding: 12px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.contact-card button:hover {
+  background-color: darken(var(--highlight-blue), 10%);
 }
 
 .contact-button {
@@ -104,57 +113,7 @@ body.dark-mode {
   transform: scale(1.05);
 }
 
-.hero {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  text-align: center;
-}
-
-.main-title {
-  font-size: 48px;
-  margin: 0;
-}
-
-.subtitle {
-  font-size: 24px;
-  margin: 15px 0 20px;
-}
-
-.portfolio-word {
-  color: var(--highlight-blue);
-}
-
-.aboutMe {
-  padding: 50px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.about-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 30px;
-  border-radius: 15px;
-  max-width: 800px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  text-align: left;
-}
-
-.about-card h2 {
-  font-size: 28px;
-  margin-bottom: 15px;
-}
-
-.seperator {
-  color: var(--highlight-blue);
-  font-size: 24px;
-  margin: 10px 0;
-}
-
+/* Footer */
 .footer {
   display: flex;
   justify-content: center;
@@ -175,55 +134,34 @@ body.dark-mode {
   color: var(--highlight-blue);
 }
 
+/* Media Queries */
+@media (max-width: 768px) {
+  .contact-card {
+    padding: 20px;
+    max-width: 90%;
+  }
 
-/* Resume Section */
-.resume-section {
-  padding: 50px;
-  text-align: center;
-  background-color: inherit; /* Inherit background color from body */
+  .contact-card h2 {
+    font-size: 24px;
+  }
+
+  .contact-card .seperator {
+    font-size: 20px;
+  }
+
+  .contact-card input,
+  .contact-card textarea {
+    font-size: 1rem;
+    padding: 8px;
+  }
+
+  .contact-card button {
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  .contact-button {
+    font-size: 14px;
+    padding: 8px 15px;
+  }
 }
-
-/* Resume Card */
-.resume-card {
-  display: inline-block;
-  background: rgba(255, 255, 255, 0.1); /* Transparent background for light/dark mode */
-  backdrop-filter: blur(10px);
-  padding: 70px; /* Increased padding for more spacing inside */
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  color: inherit;
-  width: 70%; /* Slightly smaller width */
-  max-width: 1100px; /* Adjusted max-width */
-  margin: 40px auto; /* Increased margin for better spacing around the card */
-}
-
-/* Resume Viewer */
-.resume-card iframe {
-  width: 90%; /* Full width of the container */
-  height: 650px; /* Adjusted height to make it slightly smaller */
-  border: none;
-}
-
-.resume-link {
-  text-decoration: none;
-  color: var(--highlight-blue);
-  font-size: 16px;
-  padding: 10px 15px;
-  border: 1px solid var(--highlight-blue);
-  border-radius: 5px;
-  transition: background-color 0.3s, color 0.3s;
-  margin-top: 30px; /* Added margin-top to move it down */
-
-}
-
-.resume-link:hover {
-  background-color: var(--highlight-blue);
-  color: white;
-}
-
-.separator {
-  color: var(--highlight-blue);
-  font-size: 24px;
-  margin: 10px 0;
-} 
