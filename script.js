@@ -114,9 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const screenWidth = window.innerWidth;
 
       if (screenWidth < 768) {
-        // For smaller screens, adjust width and height dynamically
-        resumeIframe.style.width = '95%';
-        resumeIframe.style.height = '400px';
+        // Adjust iframe dimensions for smaller screens
+        resumeIframe.style.width = '100%';
+        resumeIframe.style.height = '500px';
       } else {
         // Restore to desktop dimensions
         resumeIframe.style.width = '90%';
@@ -128,4 +128,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Run adjustIframe on load and resize
   adjustIframe();
   window.addEventListener('resize', adjustIframe);
+  const downloadButton = document.createElement('a');
+  downloadButton.href = 'path/to/your/resume.pdf'; // Replace with your PDF file path
+  downloadButton.textContent = 'Download Resume';
+  downloadButton.classList.add('contact-button');
+  downloadButton.style.display = 'block';
+  downloadButton.style.marginTop = '20px';
+  downloadButton.download = 'Resume.pdf';
+
+  const resumeCard = document.querySelector('.resume-card');
+  if (resumeCard) {
+    resumeCard.appendChild(downloadButton);
+  }
 });

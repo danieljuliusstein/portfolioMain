@@ -468,9 +468,32 @@ body.dark-mode .resume-card {
   }
 
   .resume-card iframe {
-    width: 95%;
-    height: 400px;
+    width: 100%; /* Adjust to the parent container */
+    height: auto; /* Allow the height to adjust automatically */
+    border: none;
   }
+  
+  .resume-card {
+    text-align: center;
+  }
+  
+  .contact-button {
+    display: inline-block;
+    background-color: var(--highlight-blue);
+    color: white;
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+    margin: 20px auto 0;
+  }
+  
+  .contact-button:hover {
+    transform: scale(1.05);
+  }
+  
 }
 /* Resume Link */
 .resume-link {
