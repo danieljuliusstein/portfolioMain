@@ -107,4 +107,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }, 200));
+  // Adjust iframe scaling for better mobile responsiveness
+  const adjustIframe = () => {
+    const resumeIframe = document.querySelector('.resume-card iframe');
+    if (resumeIframe) {
+      const screenWidth = window.innerWidth;
+
+      if (screenWidth < 768) {
+        // For smaller screens, adjust width and height dynamically
+        resumeIframe.style.width = '95%';
+        resumeIframe.style.height = '400px';
+      } else {
+        // Restore to desktop dimensions
+        resumeIframe.style.width = '90%';
+        resumeIframe.style.height = '650px';
+      }
+    }
+  };
+
+  // Run adjustIframe on load and resize
+  adjustIframe();
+  window.addEventListener('resize', adjustIframe);
 });

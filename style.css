@@ -435,17 +435,16 @@ body.dark-mode {
 /* Resume Card */
 .resume-card {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.1); /* Default for light mode */
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   padding: 70px;
   border-radius: 15px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   text-align: center;
-  color: inherit; /* Matches the body text color */
+  color: inherit;
   width: 70%;
   max-width: 1100px;
   margin: 40px auto;
-  transition: background-color 0.3s, color 0.3s;
 }
 
 /* Resume Card for Dark Mode */
@@ -455,13 +454,24 @@ body.dark-mode .resume-card {
   box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
 }
 
-/* Resume Viewer */
 .resume-card iframe {
   width: 90%;
   height: 650px;
   border: none;
+  transition: width 0.3s, height 0.3s;
 }
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .resume-card {
+    width: 95%;
+    padding: 30px;
+  }
 
+  .resume-card iframe {
+    width: 95%;
+    height: 400px;
+  }
+}
 /* Resume Link */
 .resume-link {
   text-decoration: none;
