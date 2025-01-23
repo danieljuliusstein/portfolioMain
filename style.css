@@ -429,31 +429,40 @@ body.dark-mode {
 .resume-section {
   padding: 50px;
   text-align: center;
-  background-color: inherit; /* Inherit background color from body */
+  background-color: inherit; /* Matches the body background */
 }
 
 /* Resume Card */
 .resume-card {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.1); /* Transparent background for light/dark mode */
+  background: rgba(255, 255, 255, 0.1); /* Default for light mode */
   backdrop-filter: blur(10px);
-  padding: 70px; /* Increased padding for more spacing inside */
+  padding: 70px;
   border-radius: 15px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   text-align: center;
-  color: inherit;
-  width: 70%; /* Slightly smaller width */
-  max-width: 1100px; /* Adjusted max-width */
-  margin: 40px auto; /* Increased margin for better spacing around the card */
+  color: inherit; /* Matches the body text color */
+  width: 70%;
+  max-width: 1100px;
+  margin: 40px auto;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Resume Card for Dark Mode */
+body.dark-mode .resume-card {
+  background: rgba(0, 0, 0, 0.5); /* Darker background for dark mode */
+  color: #ffffff; /* Ensures text remains visible in dark mode */
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
 }
 
 /* Resume Viewer */
 .resume-card iframe {
-  width: 90%; /* Full width of the container */
-  height: 650px; /* Adjusted height to make it slightly smaller */
+  width: 90%;
+  height: 650px;
   border: none;
 }
 
+/* Resume Link */
 .resume-link {
   text-decoration: none;
   color: var(--highlight-blue);
@@ -462,14 +471,19 @@ body.dark-mode {
   border: 1px solid var(--highlight-blue);
   border-radius: 5px;
   transition: background-color 0.3s, color 0.3s;
-  margin-top: 30px; /* Added margin-top to move it down */
+  margin-top: 30px;
+}
 
+body.dark-mode .resume-link {
+  border-color: #ffffff; /* Adjusted for dark mode */
+  color: #ffffff; /* Ensures visibility in dark mode */
 }
 
 .resume-link:hover {
   background-color: var(--highlight-blue);
   color: white;
 }
+
 
 .separator {
   color: var(--highlight-blue);
