@@ -342,7 +342,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Helvetica Neue', sans-serif;
-  background-color: var(--highlight-blue, #00bcd4);
+  background-color: var(--highlight-blue, white);
   color: white;
   transition: background-color 0.3s, color 0.3s;
 }
