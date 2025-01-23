@@ -14,7 +14,6 @@
   }
 }
 
-
 html, body {
   margin: 0;
   padding: 0;
@@ -56,7 +55,6 @@ body.dark-mode {
   margin-left: auto;
 }
 
-
 /* Header Bar */
 .headerBar {
   display: flex;
@@ -81,7 +79,7 @@ body.dark-mode {
 
 /* Apply blue color to 'J' in DJS */
 .name-display span.j {
-  color: var(--highlight-blue); /* Applying blue to the 'J' */
+  color: var(--highlight-blue);
 }
 
 /* Navigation and Toggle Button Container */
@@ -103,15 +101,15 @@ body.dark-mode {
   color: inherit;
   font-size: 16px;
   padding: 10px 15px;
-  transition: color 0.3s; /* Only transitioning the color */
+  transition: color 0.3s;
   cursor: pointer;
-  background: none; /* No background */
-  border: none; /* No border */
-  border-radius: 5px; /* Rounded corners */
+  background: none;
+  border: none;
+  border-radius: 5px;
 }
 
 .nav-link:hover {
-  color: var(--highlight-blue); /* Change only the text color on hover */
+  color: var(--highlight-blue);
 }
 
 /* Light/Dark Toggle Button */
@@ -124,7 +122,7 @@ body.dark-mode {
 }
 
 #theme-toggle:hover {
-  color: var(--highlight-blue); /* Change the text color on hover */
+  color: var(--highlight-blue);
 }
 
 /* Contact Me Button */
@@ -142,16 +140,18 @@ body.dark-mode {
 
 .contact-button:hover {
   transform: scale(1.05);
+  background-color: #008ba3;
 }
 
 /* Hero Section - Center the content */
 .hero {
   display: flex;
   flex-direction: column;
-  justify-content: center;  /* Vertically center content */
-  align-items: center;      /* Horizontally center content */
+  justify-content: center;
+  align-items: center;
   height: 100vh;
   text-align: center;
+  background-color: inherit;
 }
 
 .main-title {
@@ -161,18 +161,20 @@ body.dark-mode {
 
 .subtitle {
   font-size: 24px;
-  margin: 15px 60 20;
+  margin: 15px 0 20px;
 }
 
 .portfolio-word {
-  color: var(--highlight-blue); /* Makes 'Portfolio' blue */
+  color: var(--highlight-blue);
 }
+
 /* About Me Section */
 .aboutMe {
   padding: 50px;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: inherit;
 }
 
 .about-card {
@@ -192,7 +194,7 @@ body.dark-mode {
 }
 
 .seperator {
-  color: var(--highlight-blue); /* Color the separator with your blue */
+  color: var(--highlight-blue);
   font-size: 24px;
   margin: 10px 0;
 }
@@ -225,16 +227,16 @@ body.dark-mode {
   text-decoration: none;
   color: inherit;
   font-size: 16px;
-  padding: 10px 15px;  /* Adds padding to make it look like a button */
-  transition: color 0.3s; /* Smooth transition for the color */
+  padding: 10px 15px;
+  transition: color 0.3s;
   cursor: pointer;
-  background: none;  /* No background */
-  border: none;      /* No border */
-  border-radius: 5px; /* Rounded corners */
+  background: none;
+  border: none;
+  border-radius: 5px;
 }
 
 .icon-link:hover {
-  color: var(--highlight-blue);  /* Change text color to the custom blue on hover */
+  color: var(--highlight-blue);
 }
 
 /* Button for Scroll to About Me Section */
@@ -249,20 +251,21 @@ body.dark-mode {
 
 .scroll-button:hover {
   color: var(--highlight-blue);
-  transform: translateY(3px); /* Creates a slight downward movement effect */
+  transform: translateY(3px);
 }
 
 /* Portfolio Section */
 .projSect {
   padding: 50px;
   text-align: center;
+  background-color: inherit;
 }
 
 .portfolio-cards {
   display: flex;
   gap: 20px;
   justify-content: center;
-  flex-wrap: wrap; /* Allows wrapping if the screen is smaller */
+  flex-wrap: wrap;
 }
 
 .portfolio-card {
@@ -279,7 +282,7 @@ body.dark-mode {
 }
 
 .portfolio-card:hover {
-  transform: translateY(-5px); /* Slight hover effect for interaction */
+  transform: translateY(-5px);
 }
 
 .portfolio-card img {
@@ -290,7 +293,7 @@ body.dark-mode {
 }
 
 .portfolio-card img:hover {
-  transform: scale(1.05); /* Slight zoom-in effect on hover */
+  transform: scale(1.05);
 }
 
 .portfolio-card h2 {
@@ -306,138 +309,27 @@ body.dark-mode {
 
 .project-link {
   text-decoration: none;
-  color: var(--highlight-blue);
+  background-color: var(--highlight-blue);
+  color: white;
   font-size: 16px;
   padding: 10px 15px;
-  border: 1px solid var(--highlight-blue);
+  border: none;
   border-radius: 5px;
   transition: background-color 0.3s, color 0.3s;
 }
 
 .project-link:hover {
-  background-color: var(--highlight-blue);
-  color: white;
-}
-
-.contact-button {
-  display: inline-block;
-  background-color: var(--highlight-blue); /* Blue background */
-  color: white; /* White text */
-  font-size: 16px; /* Font size */
-  padding: 10px 20px; /* Padding for size */
-  border: none; /* No border */
-  border-radius: 25px; /* Fully rounded corners */
-  text-decoration: none; /* Remove underline */
-  cursor: pointer; /* Pointer cursor */
-  transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
-}
-
-.contact-button:hover {
-  background-color: #008ba3; /* Darker blue on hover */
-  transform: scale(1.05); /* Slight zoom effect */
-}
-
-/* General Styles for Contact Me Page */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Helvetica Neue', sans-serif;
-  background-color: var(--highlight-blue, white);
-  color: white;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-/* Header Bar */
-.headerBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  position: sticky;
-  top: 0;
-  background-color: inherit;
-  border-bottom: 1px solid currentColor;
-  z-index: 1000;
-}
-
-.name-display {
-  font-size: 18px;
-  font-weight: bold;
-  color: inherit;
-  letter-spacing: 1px;
-}
-
-.name-display span.j {
-  color: var(--highlight-blue);
-}
-
-.nav-buttons {
-  display: flex;
-  gap: 15px;
-}
-
-.nav-link {
-  text-decoration: none;
-  color: inherit;
-  font-size: 16px;
-  padding: 10px 15px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.nav-link:hover {
-  color: #f5f5f5;
-}
-
-.contact-button {
-  display: inline-block;
-  background-color: white;
-  color: var(--highlight-blue);
-  font-size: 16px;
-  padding: 10px 20px;
-  border-radius: 25px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s, transform 0.2s;
-}
-
-.contact-button:hover {
   background-color: #008ba3;
-  color: white;
-  transform: scale(1.05);
 }
 
-/* Hero Section */
-.hero {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  height: 40vh;
-  padding: 20px;
-}
-
-.hero .main-title {
-  font-size: 36px;
-  margin-bottom: 10px;
-}
-
-.hero .subtitle {
-  font-size: 20px;
-  margin: 0;
-}
-
-
-/* Contact Form Section */
 /* Contact Section */
 .contact-section {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 50px;
-  background-color: inherit; /* Matches the theme's background */
-  color: inherit; /* Matches the theme's text color */
+  background-color: inherit;
+  color: inherit;
 }
 
 .contact-card {
