@@ -129,12 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
   adjustIframe();
   window.addEventListener('resize', adjustIframe);
   const downloadButton = document.createElement('a');
-  downloadButton.href = 'path/to/your/resume.pdf'; // Replace with your PDF file path
+  downloadButton.href = 'DJSResume.pdf'; // Replace with your PDF file path
   downloadButton.textContent = 'Download Resume';
   downloadButton.classList.add('contact-button');
   downloadButton.style.display = 'block';
   downloadButton.style.marginTop = '20px';
-  downloadButton.download = 'Resume.pdf';
+  downloadButton.download = 'DJSResume.pdf';
 
   const resumeCard = document.querySelector('.resume-card');
   if (resumeCard) {
