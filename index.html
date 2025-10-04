@@ -1,67 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta charset="utf-8">
-    <title>Contact Me - Daniel Stein</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Portfolio showcasing creative development work and projects">
+  <meta name="color-scheme" content="light dark">
+  <title>Portfolio - Creative Developer</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Fallback for no JS -->
+  <noscript>
+    <style>
+      .projects-grid { display: block !important; }
+      .loading-text, .modal, .toast, .theme-toggle { display: none !important; }
+      .search-wrapper, .filter-tags { opacity: 0.5; pointer-events: none; }
+    </style>
+  </noscript>
 </head>
-
 <body>
-    <!-- Header Bar -->
-    <div class="headerBar">
-        <div class="name-display">
-            D<span class="j">J</span>S
-        </div>
+  <svg class="icons" aria-hidden="true" style="display: none;">
+    <!-- Copy content from icons.svg here -->
+  </svg>
 
-        <div class="header-actions">
-            <div class="nav-buttons">
-                <a href="index.html" class="nav-link">Home</a>
-                <a href="portfolio.html" class="nav-link">Portfolio</a>
-                <a href="resume.html" class="nav-link">Resume</a>
-            </div>
-            <a href="contact.html" class="contact-button">Contact Me</a>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
 
-            <button id="theme-toggle" class="nav-link">☀︎ / ⏾</button>
-        </div>
+  <header class="site-header">
+    <div class="container">
+      <nav class="nav" aria-label="Main navigation">
+        <h1 class="logo">
+          <a href="#" class="logo-link">Portfolio</a>
+        </h1>
+        <!-- Update the theme toggle button -->
+        <button
+          class="theme-toggle"
+          aria-label="Toggle dark mode"
+          title="Toggle theme"
+        >
+          <!-- Include icons.svg at the top of the body -->
+          <svg class="icon icon-sun" aria-hidden="true">
+            <use href="#icon-sun"/>
+          </svg>
+          <svg class="icon icon-moon" aria-hidden="true">
+            <use href="#icon-moon"/>
+          </svg>
+        </button>
+      </nav>
     </div>
+  </header>
 
-    <!-- Hero Section -->
+  <main id="main-content">
     <section class="hero">
-      <h1 class="main-title">Welcome to My <span class="portfolio-word">Portfolio</span></h1>
-      <p class="subtitle"> Personable | Innovative | Driven </p>
+      <div class="container">
+        <h2 class="hero-title">
+          Hi, I'm <span class="highlight">Daniel Stein</span>
+        </h2>
+        <p class="hero-subtitle">Computer Engineer</p>
+        <p class="hero-description">
+          I build innovative solutions through software and hardware.
+          <a href="#projects" class="text-link">View my work</a> or 
+          <a href="#contact" class="text-link">get in touch</a>.
+        </p>
+      </div>
     </section>
 
-    <!-- About Me Section -->
-    <section class="aboutMe">
-        <div class="about-card">
-            <h2>About Me</h2>
-            <div class="seperator">━━</div>
-            <p>
-                Hi! I’m Daniel, a college student currently pursuing computer engineering.
-                I have always loved robotics and more recently, artificial intelligence. 
-                Creating things has always been a passion of mine, whether it be through coding, 
-                building lego mindstorms as a kid, or 3d printing my next idea, I'm constantly putting
-                my skills to the test. 
-                
-              </p>
-
+    <section id="projects" class="projects-section">
+      <div class="container">
+        <h2 class="section-title">Projects</h2>
+        <!-- This is the required element -->
+        <div id="projects-grid" class="projects-grid">
+          <p class="loading-text">Loading projects...</p>
         </div>
+      </div>
     </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer">
-            <a href="https://github.com/danieljuliusstein" target="_blank" class="icon-link">GitHub</a>
-            <a href="https://replit.com/@Daniel-SteinSte" target="_blank" class="icon-link">Replit</a>
-            <a href="mailto:danieljuliusstein@gmail.com" target="_blank" class="icon-link">Email</a>
-            <a href="https://www.linkedin.com/in/daniel-stein-8a36b8276/" target="_blank" class="icon-link">LinkedIn</a>
+    <section id="resume" class="resume-section">
+      <div class="container">
+        <h2 class="section-title">Resume</h2>
+        <div class="resume-container">
+          <iframe 
+            class="resume-preview" 
+            src="DJSResume.pdf#view=FitH" 
+            title="Resume preview"
+          ></iframe>
+          <div class="resume-actions">
+            <a href="DJSResume.pdf" download class="resume-btn primary">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 16l-4-4h3V4h2v8h3l-4 4zm9-13h-6v2h4v12H5V5h4V3H3v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V3z"/>
+              </svg>
+              Download Resume
+            </a>
+            <a href="DJSResume.pdf" target="_blank" class="resume-btn secondary">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+              </svg>
+              View Resume
+            </a>
+          </div>
         </div>
-    </footer>
+      </div>
+    </section>
 
-    <!-- JavaScript -->
-    <script src="script.js"></script>
+    <section id="contact" class="contact-section">
+      <div class="container">
+        <h2 class="section-title">Let's Connect</h2>
+        <p class="contact-intro">
+          Interested in working together? Let's talk!
+        </p>
+        <div class="contact-actions">
+          <a
+            href="mailto:your.email@example.com?subject=Portfolio%20Inquiry"
+            class="btn btn-primary"
+            data-email="your.email@example.com"
+          >
+            Send Email
+          </a>
+          <button 
+            class="btn btn-secondary" 
+            id="copy-email"
+            aria-label="Copy email address to clipboard"
+          >
+            Copy Email
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2025 Daniel Stein.</p>
+    </div>
+  </footer>
+
+  <!-- Modal Template -->
+  <div 
+    class="modal" 
+    id="project-modal" 
+    role="dialog" 
+    aria-modal="true" 
+    aria-labelledby="modal-title" 
+    aria-describedby="modal-description"
+    hidden
+  >
+    <div class="modal-overlay" aria-hidden="true"></div>
+    <div class="modal-content" role="document">
+      <button class="modal-close" aria-label="Close modal">
+        <span aria-hidden="true">×</span>
+      </button>
+      <div class="modal-body" id="modal-body">
+        <!-- Dynamic content inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div 
+    class="toast" 
+    id="toast" 
+    role="status" 
+    aria-live="polite" 
+    aria-atomic="true"
+    hidden
+  >
+    <span id="toast-message"></span>
+  </div>
+
+  <script src="main.js" defer></script>
 </body>
-
 </html>
