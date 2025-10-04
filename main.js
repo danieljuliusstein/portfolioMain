@@ -484,8 +484,203 @@ function handleThemeChange(theme) {
 }
 
 // ======================
-// Initialization
+// Contact Form Functionality
 // ======================
+const contactForm = {
+  init() {
+    this.form = document.getElementById('contact-form');
+    if (!this.form) return;
+
+    // Initialize CSRF token
+    this.initCSRF();
+    
+    // Bind event listeners
+    this.form.addEventListener('submit', this.handleSubmit.bind(this));
+    this.form.querySelectorAll('input, textarea').forEach(field => {
+      field.addEventListener('input', () => this.validateField(field));
+      field.addEventListener('blur', () => this.validateField(field));
+    });
+
+    // Initialize floating button
+    this.initFloatingButton();
+  },
+
+  async initCSRF() {
+    try {
+      const token = await this.generateCSRFToken();
+      this.form.querySelector('input[name="csrf_token"]').value = token;
+    } catch (error) {
+      console.error('Failed to initialize CSRF:', error);
+    }
+  },
+
+  generateCSRFToken() {
+    return new Promise((resolve) => {
+      const token = Math.random().toString(36).substr(2);
+      resolve(token);
+    });
+  },
+
+  validateField(field) {
+    const errorElement = document.getElementById(`${field.id}-error`);
+    if (!errorElement) return true;
+
+    let isValid = field.checkValidity();
+    let message = '';
+
+    if (!isValid) {
+      if (field.validity.valueMissing) {
+        message = `${field.name} is required`;
+      } else if (field.validity.typeMismatch && field.type === 'email') {
+        message = 'Please enter a valid email address';
+      } else if (field.validity.tooShort) {
+        message = `${field.name} must be at least ${field.minLength} characters`;
+      }
+    }
+
+    field.setAttribute('aria-invalid', !isValid);
+    errorElement.textContent = message;
+
+    return isValid;
+  },
+
+  validateForm() {
+    const fields = this.form.querySelectorAll('input[required], textarea[required]');
+    let isValid = true;
+
+    fields.forEach(field => {
+      if (!this.validateField(field)) {
+        isValid = false;
+      }
+    });
+
+    return isValid;
+  },
+
+  async handleSubmit(e) {
+    e.preventDefault();
+
+    if (!this.validateForm()) return;
+    
+    const submitBtn = this.form.querySelector('[type="submit"]');
+    submitBtn.setAttribute('data-loading', 'true');
+    
+    try {
+      // Submit to Web3Forms
+      const response = await fetch(this.form.action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.getFormData())
+      });
+
+      if (!response.ok) throw new Error('Submission failed');
+      
+      showToast('Message sent successfully!', 'success');
+      this.form.reset();
+      
+      // Show fallback options
+      document.querySelector('.contact-fallback').hidden = false;
+      
+    } catch (error) {
+      console.error('Submission error:', error);
+      showToast('Failed to send message. Please try again.', 'error');
+      
+      // Setup mailto fallback
+      const mailtoLink = this.generateMailtoLink();
+      document.getElementById('mailto-link').href = mailtoLink;
+      document.querySelector('.contact-fallback').hidden = false;
+    } finally {
+      submitBtn.setAttribute('data-loading', 'false');
+    }
+  },
+
+  getFormData() {
+    const formData = new FormData(this.form);
+    const data = Object.fromEntries(formData);
+    
+    // Sanitize data
+    Object.keys(data).forEach(key => {
+      data[key] = this.sanitizeInput(data[key]);
+    });
+
+    return data;
+  },
+
+  sanitizeInput(input) {
+    const div = document.createElement('div');
+    div.textContent = input;
+    return div.innerHTML;
+  },
+
+  generateMailtoLink() {
+    const email = 'danieljuliusstein@gmail.com';
+    const subject = encodeURIComponent('Portfolio Contact');
+    const body = encodeURIComponent(
+      `Name: ${this.form.name.value}\n` +
+      `Email: ${this.form.email.value}\n\n` +
+      `Message:\n${this.form.message.value}`
+    );
+    return `mailto:${email}?subject=${subject}&body=${body}`;
+  },
+
+  initFloatingButton() {
+    const btn = document.getElementById('float-contact');
+    if (!btn) return;
+
+    // Show button when user scrolls past contact section
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        btn.hidden = entry.isIntersecting;
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(document.getElementById('contact'));
+
+    // Handle click
+    btn.addEventListener('click', () => {
+      const modal = document.getElementById('contact-modal');
+      if (!modal) return;
+
+      // Clone contact form into modal
+      const modalBody = modal.querySelector('.modal-body');
+      modalBody.innerHTML = '';
+      modalBody.appendChild(this.form.cloneNode(true));
+
+      // Show modal
+      modal.hidden = false;
+      trapFocus(modal);
+    });
+  }
+};
+
+// Enhanced toast functionality
+function showToast(message, type = 'info', duration = 4000) {
+  const toast = document.getElementById('toast');
+  const messageEl = document.getElementById('toast-message');
+  
+  // Clear existing timeout
+  if (toast.timeoutId) {
+    clearTimeout(toast.timeoutId);
+    toast.hidden = true;
+  }
+
+  messageEl.textContent = message;
+  toast.setAttribute('data-type', type);
+  toast.hidden = false;
+  toast.setAttribute('data-visible', 'true');
+
+  // Auto-hide unless reduced motion is preferred
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    toast.timeoutId = setTimeout(() => {
+      toast.setAttribute('data-visible', 'false');
+      setTimeout(() => {
+        toast.hidden = true;
+      }, 300);
+    }, duration);
+  }
+}
+
+// Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM loaded, initializing...'); // Debug log
   const elements = initializeApp();

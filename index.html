@@ -105,21 +105,84 @@
         <p class="contact-intro">
           Interested in working together? Let's talk!
         </p>
-        <div class="contact-actions">
-          <a
-            href="mailto:danieljuliusstein@gmail.com"
-            class="btn btn-primary"
-            data-email="your.email@example.com"
-          >
-            Send Email
-          </a>
-          <button 
-            class="btn btn-secondary" 
-            id="copy-email"
-            aria-label="Copy email address to clipboard"
-          >
-            Copy Email
+        <form 
+          action="https://api.web3forms.com/submit" 
+          method="POST" 
+          class="contact-form"
+          id="contact-form"
+          novalidate
+        >
+          <!-- Web3Forms Key -->
+          <input type="hidden" name="access_key" value="5b818263-9372-4771-a1e5-cf363350a6c5">
+          
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              required 
+              minlength="2"
+              aria-describedby="name-error"
+            >
+            <div id="name-error" class="form-error"></div>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              required
+              aria-describedby="email-error"
+            >
+            <div id="email-error" class="form-error"></div>
+          </div>
+          
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea 
+              id="message" 
+              name="message" 
+              required
+              minlength="10"
+              aria-describedby="message-error"
+            ></textarea>
+            <div id="message-error" class="form-error"></div>
+          </div>
+          
+          <!-- Honeypot -->
+          <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
+          
+          <!-- CSRF Protection -->
+          <input type="hidden" name="csrf_token" value="">
+          
+          <button type="submit" class="btn btn-primary">
+            <span class="spinner" aria-hidden="true"></span>
+            Send Message
           </button>
+        </form>
+
+        <!-- Fallback Options -->
+        <div class="contact-fallback" hidden>
+          <p>Alternatively, you can:</p>
+          <div class="contact-actions">
+            <a 
+              href="mailto:danieljuliusstein@gmail.com" 
+              class="btn btn-outline"
+              id="mailto-link"
+            >
+              Open Email Client
+            </a>
+            <button 
+              class="btn btn-secondary" 
+              id="copy-email"
+              aria-label="Copy email address to clipboard"
+            >
+              Copy Email
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -162,6 +225,36 @@
     hidden
   >
     <span id="toast-message"></span>
+  </div>
+
+  <!-- Floating Contact Button -->
+  <button 
+    class="btn btn-primary float-contact" 
+    id="float-contact"
+    aria-label="Open contact form"
+    hidden
+  >
+    Contact Me
+  </button>
+
+  <!-- Contact Modal -->
+  <div 
+    class="modal contact-modal" 
+    id="contact-modal" 
+    role="dialog" 
+    aria-labelledby="modal-title"
+    aria-modal="true"
+    hidden
+  >
+    <div class="modal-overlay" aria-hidden="true"></div>
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Close contact form">
+        <span aria-hidden="true">×</span>
+      </button>
+      <div class="modal-body">
+        <!-- Contact form will be cloned here -->
+      </div>
+    </div>
   </div>
 
   <script src="main.js" defer></script>
