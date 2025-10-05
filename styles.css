@@ -1335,21 +1335,32 @@ kbd {
 .resume-preview-wrapper {
   position: relative;
   width: 100%;
-  height: 70vh; /* 70% of viewport height */
-  max-height: 800px;
-  margin: 0 auto;
+  height: auto;
   background: var(--color-bg);
+  overflow: hidden;
 }
 
 .resume-preview {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  max-height: 800px;
   border: none;
   background: var(--color-bg);
-  transition: transform var(--transition);
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 768px) {
+  .resume-preview {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 0.77; /* Standard page aspect ratio (8.5:11) */
+  }
+
+  .resume-container {
+    margin: 0 auto;
+    padding: var(--spacing-sm);
+  }
 }
 
 /* Resume actions container */
