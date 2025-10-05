@@ -774,10 +774,14 @@ kbd {
    Contact Section
    ====================== */
 .contact-section {
+  position: relative;
   padding: var(--spacing-xl) 0;
+  background: var(--color-bg);
   text-align: center;
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
 }
 
 .contact-section::before {
@@ -794,27 +798,168 @@ kbd {
   pointer-events: none;
 }
 
-.contact-section {
-  position: relative;
-}
-
-.contact-section > * {
+.contact-section .container {
   position: relative;
   z-index: 1;
+  width: 100%;
+}
+
+.contact-section .section-title {
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text);
 }
 
 .contact-intro {
-  max-width: 500px;
-  margin: var(--spacing-md) auto;
+  font-size: 1.5rem;
+  max-width: 600px;
+  margin: var(--spacing-lg) auto;
   color: var(--color-text-muted);
-  font-size: 1.125rem;
+  line-height: 1.4;
 }
 
+.contact-form {
+  max-width: 500px;
+  margin: var(--spacing-xl) auto;
+}
+
+.form-group {
+  margin-bottom: var(--spacing-lg);
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-text);
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.125rem;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  color: var(--color-text);
+  transition: border-color var(--transition);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.form-group textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.form-group input[aria-invalid="true"],
+.form-group textarea[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
+.form-error {
+  color: var(--color-error);
+  font-size: 0.875rem;
+  margin-top: var(--spacing-xs);
+  display: none;
+}
+
+[aria-invalid="true"] + .form-error {
+  display: block;
+}
+
+/* Submit button and actions */
 .contact-actions {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
   justify-content: center;
-  flex-wrap: wrap;
+  margin-top: var(--spacing-lg);
+}
+
+.contact-actions .btn {
+  min-width: 180px;
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+}
+
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 2px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background: var(--color-border);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .contact-section .section-title {
+    font-size: 2.5rem;
+  }
+
+  .contact-intro {
+    font-size: 1.25rem;
+    padding: 0 var(--spacing-md);
+  }
+
+  .contact-form {
+    margin: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .form-group label {
+    font-size: 1.125rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    font-size: 1rem;
+    padding: 0.875rem;
+  }
+
+  .contact-actions {
+    flex-direction: column;
+    padding: 0 var(--spacing-md);
+  }
+
+  .contact-actions .btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* Dark theme enhancements */
+[data-theme="dark"] .contact-section::before {
+  opacity: var(--dot-opacity);
+}
+
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group textarea {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .form-group input:focus,
+[data-theme="dark"] .form-group textarea:focus {
+  border-color: var(--color-accent);
 }
 
 /* ======================
@@ -1155,11 +1300,29 @@ kbd {
   padding: var(--spacing-xl) 0;
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);
+  overflow: hidden; /* Contain the dots */
+}
+
+/* Dot pattern background */
+.resume-section::before,
+.modal.resume-modal .modal-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    var(--dot-color) var(--dot-size),
+    transparent var(--dot-size)
+  );
+  background-size: var(--dot-space) var(--dot-space);
+  opacity: var(--dot-opacity);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .resume-container {
   position: relative;
   max-width: 800px;
+  width: 90%;
   margin: 0 auto;
   background: var(--color-bg);
   border-radius: var(--border-radius);
@@ -1168,13 +1331,28 @@ kbd {
   z-index: 1;
 }
 
-.resume-preview {
+/* Resume preview container */
+.resume-preview-wrapper {
+  position: relative;
   width: 100%;
-  height: 700px;
-  border: none;
+  height: 70vh; /* 70% of viewport height */
+  max-height: 800px;
+  margin: 0 auto;
   background: var(--color-bg);
 }
 
+.resume-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: var(--color-bg);
+  transition: transform var(--transition);
+}
+
+/* Resume actions container */
 .resume-actions {
   display: flex;
   justify-content: center;
@@ -1182,291 +1360,123 @@ kbd {
   padding: var(--spacing-md);
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
 }
 
-/* Simplified button styles */
 .resume-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  min-width: 180px;
   font-size: 0.9375rem;
   font-weight: 600;
   border-radius: var(--border-radius);
   transition: all var(--transition);
   cursor: pointer;
   text-decoration: none;
+  min-width: 140px;
+  max-width: 200px;
 }
 
-.resume-btn.primary {
-  background: var(--color-accent);
-  color: white;
-  border: none;
-}
-
-.resume-btn.primary:hover {
-  background: var(--color-accent-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-.resume-btn.secondary {
-  background: transparent;
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-}
-
-.resume-btn.secondary:hover {
-  background: var(--color-surface);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-/* Keep icons a reasonable size */
-.resume-btn svg,
-.resume-btn img {
+.resume-btn svg {
   width: 20px;
   height: 20px;
+  flex-shrink: 0;
 }
 
-/* Add new icon styles */
-.icon {
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
-  stroke: var(--icon-stroke);
-  stroke-width: var(--icon-stroke-width);
-  fill: var(--icon-fill);
-  transition: transform var(--icon-transition-duration) ease;
+/* Modal specific styles */
+.resume-modal {
+  --modal-width: min(90vw, 1000px);
+  --modal-height: 85vh;
 }
 
-.icon--sm { 
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
-}
-
-.icon--lg {
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
-}
-
-/* Theme-specific icon adjustments */
-[data-theme="dark"] .icon {
-  stroke-width: var(--icon-stroke-width-dark);
-}
-
-/* Update theme toggle button styles */
-.theme-toggle {
+.resume-modal .modal-content {
   position: relative;
-  width: 40px;
-  height: 40px;
-  padding: 8px;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--color-text);
-  cursor: pointer;
-  transition: background-color var(--theme-transition-duration),
-              transform var(--icon-transition-duration);
-}
-
-.theme-toggle:hover {
-  background-color: var(--color-surface);
-  transform: rotate(15deg);
-}
-
-.theme-toggle:active {
-  transform: scale(0.95);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .theme-toggle {
-    transition: background-color var(--theme-transition-duration);
-  }
-  
-  .theme-toggle:hover {
-    transform: none;
-  }
-}
-
-/* Theme icon state management */
-.theme-toggle .icon-sun {
-  opacity: 0;
-  transform: rotate(-90deg) scale(0);
-  position: absolute;
-  top: 8px;
-  left: 8px;
-}
-
-.theme-toggle .icon-moon {
-  opacity: 1;
-  transform: rotate(0) scale(1);
-}
-
-[data-theme="dark"] .theme-toggle .icon-sun {
-  opacity: 1;
-  transform: rotate(0) scale(1);
-}
-
-[data-theme="dark"] .theme-toggle .icon-moon {
-  opacity: 0;
-  transform: rotate(90deg) scale(0);
-}
-
-/* Contact Form Styles */
-.contact-form {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: var(--spacing-md);
-}
-
-.form-group {
-  margin-bottom: var(--spacing-md);
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: var(--spacing-xs);
-  color: var(--color-text);
-  font-weight: 500;
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 2px solid var(--color-border);
-  border-radius: var(--border-radius);
+  width: var(--modal-width);
+  height: var(--modal-height);
+  max-width: none;
+  display: flex;
+  flex-direction: column;
   background: var(--color-bg);
-  color: var(--color-text);
-  font-family: inherit;
-  transition: border-color var(--transition);
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
-  border-color: var(--color-accent);
-  outline: none;
-}
-
-.form-group input[aria-invalid="true"],
-.form-group textarea[aria-invalid="true"] {
-  border-color: var(--color-error);
-}
-
-.form-error {
-  color: var(--color-error);
-  font-size: 0.875rem;
-  margin-top: var(--spacing-xs);
-  display: none;
-}
-
-[aria-invalid="true"] + .form-error {
-  display: block;
-}
-
-.form-group textarea {
-  min-height: 150px;
-  resize: vertical;
-}
-
-/* Loading Spinner */
-.spinner {
-  display: none;
-  width: 20px;
-  height: 20px;
-  border: 2px solid transparent;
-  border-top-color: currentColor;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-
-.btn[data-loading="true"] {
+.resume-modal .modal-body {
+  flex: 1;
+  overflow: hidden;
   position: relative;
-  pointer-events: none;
-  opacity: 0.8;
 }
 
-.btn[data-loading="true"] .spinner {
-  display: inline-block;
-  margin-right: var(--spacing-xs);
+.resume-modal .resume-preview-wrapper {
+  height: 100%;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Floating Contact Button */
-.float-contact {
-  position: fixed;
-  right: var(--spacing-md);
+/* Zoom controls */
+.resume-controls {
+  position: absolute;
   bottom: var(--spacing-md);
-  z-index: 90;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.float-contact.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Contact Modal */
-.contact-modal {
-  --modal-width: 500px;
-  width: min(var(--modal-width), 100% - 2rem);
-}
-
-.contact-modal .modal-content {
-  max-width: var(--modal-width);
-}
-
-/* Toast Enhancements */
-.toast {
-  --toast-success: #10B981;
-  --toast-error: #EF4444;
-  --toast-info: #3B82F6;
-  
-  position: fixed;
-  bottom: var(--spacing-lg);
-  right: var(--spacing-lg);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--border-radius);
+  right: var(--spacing-md);
+  display: flex;
+  gap: var(--spacing-xs);
+  z-index: 2;
   background: var(--color-surface);
+  padding: 4px;
+  border-radius: var(--border-radius);
   border: 1px solid var(--color-border);
-  color: var(--color-text);
-  box-shadow: var(--shadow-lg);
-  z-index: 100;
-  
+  box-shadow: var(--shadow-md);
+}
+
+.resume-control-btn {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition);
 }
 
-.toast[data-visible="true"] {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.toast[data-type="success"] { border-left: 4px solid var(--toast-success); }
-.toast[data-type="error"] { border-left: 4px solid var(--toast-error); }
-.toast[data-type="info"] { border-left: 4px solid var(--toast-info); }
-
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  .spinner {
-    animation: none;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .resume-preview-wrapper {
+    height: 70vh;
   }
   
-  .toast,
-  .float-contact {
-    transition: opacity 0.1s ease;
-    transform: none;
+  .resume-btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    min-width: 120px;
+  }
+  
+  .resume-controls {
+    bottom: var(--spacing-sm);
+    right: var(--spacing-sm);
+  }
+  
+  .resume-modal {
+    --modal-width: 95vw;
+    --modal-height: 80vh;
+  }
+}
+
+/* Print styles */
+@media print {
+  .resume-controls,
+  .resume-actions {
+    display: none !important;
+  }
+  
+  .resume-preview-wrapper {
+    height: auto;
+  }
+  
+  .resume-preview {
+    position: relative;
+    height: auto;
   }
 }

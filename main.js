@@ -680,6 +680,176 @@ function showToast(message, type = 'info', duration = 4000) {
   }
 }
 
+// File Viewer Controls
+const fileViewer = {
+  init() {
+    this.container = document.querySelector('.resume-preview-wrapper');
+    this.iframe = document.getElementById('resume-preview');
+    if (!this.container || !this.iframe) return;
+
+    // Initialize zoom state
+    this.scale = 1;
+    this.maxScale = 2;
+    this.minScale = 0.5;
+    this.lastX = 0;
+    this.lastY = 0;
+    this.isDragging = false;
+
+    // Bind event handlers
+    this.bindEvents();
+    this.initZoomControls();
+  },
+
+  bindEvents() {
+    // Mouse wheel zoom
+    this.container.addEventListener('wheel', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        this.zoom(delta, e.clientX, e.clientY);
+      }
+    });
+
+    // Pan functionality
+    this.container.addEventListener('mousedown', (e) => {
+      this.startDrag(e.clientX, e.clientY);
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (this.isDragging) {
+        this.drag(e.clientX, e.clientY);
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      this.isDragging = false;
+    });
+
+    // Touch events
+    this.container.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        this.pinchStart(e);
+      } else if (e.touches.length === 1) {
+        this.startDrag(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    });
+
+    this.container.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        this.pinchMove(e);
+      } else if (e.touches.length === 1 && this.isDragging) {
+        this.drag(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    });
+
+    this.container.addEventListener('touchend', () => {
+      this.isDragging = false;
+      this.lastPinchDistance = null;
+    });
+  },
+
+  initZoomControls() {
+    const zoomIn = document.getElementById('zoom-in');
+    const zoomOut = document.getElementById('zoom-out');
+    const zoomReset = document.getElementById('zoom-reset');
+
+    if (zoomIn) {
+      zoomIn.addEventListener('click', () => this.zoom(0.1));
+    }
+    if (zoomOut) {
+      zoomOut.addEventListener('click', () => this.zoom(-0.1));
+    }
+    if (zoomReset) {
+      zoomReset.addEventListener('click', () => this.resetZoom());
+    }
+  },
+
+  zoom(delta, clientX, clientY) {
+    const newScale = Math.min(Math.max(this.scale + delta, this.minScale), this.maxScale);
+    if (newScale === this.scale) return;
+
+    // Calculate zoom point (default to center if not provided)
+    const rect = this.container.getBoundingClientRect();
+    const x = clientX ? ((clientX - rect.left) / this.scale) : (rect.width / 2);
+    const y = clientY ? ((clientY - rect.top) / this.scale) : (rect.height / 2);
+
+    this.scale = newScale;
+    this.updateTransform();
+
+    // Update zoom controls state
+    this.updateZoomControlsState();
+  },
+
+  startDrag(x, y) {
+    this.isDragging = true;
+    this.lastX = x;
+    this.lastY = y;
+  },
+
+  drag(x, y) {
+    if (!this.isDragging) return;
+
+    const dx = (x - this.lastX) / this.scale;
+    const dy = (y - this.lastY) / this.scale;
+
+    this.lastX = x;
+    this.lastY = y;
+
+    // Update transform
+    const current = new DOMMatrix(getComputedStyle(this.iframe).transform);
+    this.iframe.style.transform = current.translate(dx, dy).scale(this.scale);
+  },
+
+  pinchStart(e) {
+    const touch1 = e.touches[0];
+    const touch2 = e.touches[1];
+    this.lastPinchDistance = Math.hypot(
+      touch1.clientX - touch2.clientX,
+      touch1.clientY - touch2.clientY
+    );
+  },
+
+  pinchMove(e) {
+    if (!this.lastPinchDistance) return;
+
+    const touch1 = e.touches[0];
+    const touch2 = e.touches[1];
+    const distance = Math.hypot(
+      touch1.clientX - touch2.clientX,
+      touch1.clientY - touch2.clientY
+    );
+
+    const delta = (distance - this.lastPinchDistance) * 0.01;
+    this.lastPinchDistance = distance;
+
+    // Calculate center of pinch
+    const centerX = (touch1.clientX + touch2.clientX) / 2;
+    const centerY = (touch1.clientY + touch2.clientY) / 2;
+
+    this.zoom(delta, centerX, centerY);
+  },
+
+  resetZoom() {
+    this.scale = 1;
+    this.iframe.style.transform = 'scale(1) translate(0, 0)';
+    this.updateZoomControlsState();
+  },
+
+  updateTransform() {
+    const matrix = new DOMMatrix(getComputedStyle(this.iframe).transform);
+    this.iframe.style.transform = matrix.scale(this.scale);
+  },
+
+  updateZoomControlsState() {
+    const zoomIn = document.getElementById('zoom-in');
+    const zoomOut = document.getElementById('zoom-out');
+    if (zoomIn) zoomIn.disabled = this.scale >= this.maxScale;
+    if (zoomOut) zoomOut.disabled = this.scale <= this.minScale;
+  }
+};
+
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM loaded, initializing...'); // Debug log
@@ -696,5 +866,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Add event listeners
   elements.themeToggle.addEventListener('click', toggleTheme);
+
+  // Initialize file viewer
+  fileViewer.init();
 });
 
