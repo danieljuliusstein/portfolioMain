@@ -850,6 +850,28 @@ const fileViewer = {
   }
 };
 
+const resumeViewer = {
+  init() {
+    this.iframe = document.getElementById('resume-preview');
+    if (!this.iframe) return;
+
+    // Handle mobile devices
+    if (window.innerWidth <= 768) {
+      this.setupMobileView();
+    }
+  },
+
+  setupMobileView() {
+    // Ensure proper scaling on mobile
+    this.iframe.onload = () => {
+      // Force the PDF to fit to width and disable scrolling
+      if (this.iframe.contentWindow) {
+        this.iframe.contentWindow.scrollTo(0, 0);
+      }
+    };
+  }
+};
+
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM loaded, initializing...'); // Debug log
@@ -869,5 +891,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize file viewer
   fileViewer.init();
+
+  // Initialize resume viewer
+  resumeViewer.init();
 });
 

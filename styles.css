@@ -1298,196 +1298,54 @@ kbd {
 .resume-section {
   position: relative;
   padding: var(--spacing-xl) 0;
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-  overflow: hidden; /* Contain the dots */
-}
-
-/* Dot pattern background */
-.resume-section::before,
-.modal.resume-modal .modal-content::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(
-    var(--dot-color) var(--dot-size),
-    transparent var(--dot-size)
-  );
-  background-size: var(--dot-space) var(--dot-space);
-  opacity: var(--dot-opacity);
-  z-index: 0;
-  pointer-events: none;
+  background: var(--color-bg);
 }
 
 .resume-container {
-  position: relative;
   max-width: 800px;
-  width: 90%;
   margin: 0 auto;
   background: var(--color-bg);
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
   overflow: hidden;
-  z-index: 1;
 }
 
-/* Resume preview container */
 .resume-preview-wrapper {
   position: relative;
   width: 100%;
-  height: auto;
   background: var(--color-bg);
-  overflow: hidden;
 }
 
 .resume-preview {
-  position: relative;
+  display: block;
   width: 100%;
   height: 100vh;
-  max-height: 800px;
+  max-height: 1000px;
   border: none;
-  background: var(--color-bg);
 }
 
 /* Mobile specific adjustments */
-@media (max-width: 768px) {
-  .resume-preview {
-    height: auto;
-    min-height: 0;
-    aspect-ratio: 0.77; /* Standard page aspect ratio (8.5:11) */
-  }
-
+@media screen and (max-width: 768px) {
   .resume-container {
-    margin: 0 auto;
-    padding: var(--spacing-sm);
+    margin: 0 var(--spacing-sm);
   }
-}
 
-/* Resume actions container */
-.resume-actions {
-  display: flex;
-  justify-content: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-  flex-wrap: wrap;
-}
-
-.resume-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  border-radius: var(--border-radius);
-  transition: all var(--transition);
-  cursor: pointer;
-  text-decoration: none;
-  min-width: 140px;
-  max-width: 200px;
-}
-
-.resume-btn svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-/* Modal specific styles */
-.resume-modal {
-  --modal-width: min(90vw, 1000px);
-  --modal-height: 85vh;
-}
-
-.resume-modal .modal-content {
-  position: relative;
-  width: var(--modal-width);
-  height: var(--modal-height);
-  max-width: none;
-  display: flex;
-  flex-direction: column;
-  background: var(--color-bg);
-}
-
-.resume-modal .modal-body {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-}
-
-.resume-modal .resume-preview-wrapper {
-  height: 100%;
-}
-
-/* Zoom controls */
-.resume-controls {
-  position: absolute;
-  bottom: var(--spacing-md);
-  right: var(--spacing-md);
-  display: flex;
-  gap: var(--spacing-xs);
-  z-index: 2;
-  background: var(--color-surface);
-  padding: 4px;
-  border-radius: var(--border-radius);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-md);
-}
-
-.resume-control-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: none;
-  background: var(--color-bg);
-  color: var(--color-text);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all var(--transition);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .resume-preview-wrapper {
-    height: 70vh;
-  }
-  
-  .resume-btn {
-    padding: 0.625rem 1rem;
-    font-size: 0.875rem;
-    min-width: 120px;
-  }
-  
-  .resume-controls {
-    bottom: var(--spacing-sm);
-    right: var(--spacing-sm);
-  }
-  
-  .resume-modal {
-    --modal-width: 95vw;
-    --modal-height: 80vh;
-  }
-}
-
-/* Print styles */
-@media print {
-  .resume-controls,
-  .resume-actions {
-    display: none !important;
-  }
-  
   .resume-preview-wrapper {
     height: auto;
   }
-  
+
   .resume-preview {
-    position: relative;
     height: auto;
+    min-height: 500px; /* Adjust this value based on your needs */
+    transform: scale(1);
+    transform-origin: top center;
+  }
+
+  .resume-actions {
+    position: sticky;
+    bottom: 0;
+    background: var(--color-bg);
+    padding: var(--spacing-sm);
+    box-shadow: var(--shadow-md);
+    z-index: 10;
   }
 }
