@@ -1152,164 +1152,38 @@ kbd {
    ====================== */
 .resume-section {
   position: relative;
-  padding: var(--spacing-xl) 0;
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
+  padding: 2rem 1rem;  /* Reduced from 4rem 2rem */
+  min-height: auto;    /* Remove fixed height if any */
 }
 
 .resume-container {
-  position: relative;
-  max-width: 800px;
+  max-width: 800px;    /* Reduced from any larger value */
   margin: 0 auto;
-  background: var(--color-bg);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-  z-index: 1;
+  padding: 1rem;       /* Reduced from 2rem */
 }
 
 .resume-preview {
   width: 100%;
-  height: 700px;
-  border: none;
-  background: var(--color-bg);
+  height: 60vh;       /* Reduced from 80vh if previously larger */
+  max-height: 600px;  /* Added max-height constraint */
+  margin-bottom: 1rem;
 }
 
 .resume-actions {
   display: flex;
+  gap: 1rem;          /* Reduced from 1.5rem if previously larger */
   justify-content: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
+  margin-top: 1rem;   /* Reduced from 2rem */
 }
 
-/* Simplified button styles */
 .resume-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  min-width: 180px;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  border-radius: var(--border-radius);
-  transition: all var(--transition);
-  cursor: pointer;
-  text-decoration: none;
+  padding: 0.5rem 1rem;  /* Reduced from 0.75rem 1.5rem */
+  font-size: 0.9rem;     /* Reduced from 1rem */
 }
 
-.resume-btn.primary {
-  background: var(--color-accent);
-  color: white;
-  border: none;
-}
-
-.resume-btn.primary:hover {
-  background: var(--color-accent-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-.resume-btn.secondary {
-  background: transparent;
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-}
-
-.resume-btn.secondary:hover {
-  background: var(--color-surface);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-/* Keep icons a reasonable size */
 .resume-btn svg,
 .resume-btn img {
-  width: 20px;
-  height: 20px;
-}
-
-/* Add new icon styles */
-.icon {
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
-  stroke: var(--icon-stroke);
-  stroke-width: var(--icon-stroke-width);
-  fill: var(--icon-fill);
-  transition: transform var(--icon-transition-duration) ease;
-}
-
-.icon--sm { 
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
-}
-
-.icon--lg {
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
-}
-
-/* Theme-specific icon adjustments */
-[data-theme="dark"] .icon {
-  stroke-width: var(--icon-stroke-width-dark);
-}
-
-/* Update theme toggle button styles */
-.theme-toggle {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  padding: 8px;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--color-text);
-  cursor: pointer;
-  transition: background-color var(--theme-transition-duration),
-              transform var(--icon-transition-duration);
-}
-
-.theme-toggle:hover {
-  background-color: var(--color-surface);
-  transform: rotate(15deg);
-}
-
-.theme-toggle:active {
-  transform: scale(0.95);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .theme-toggle {
-    transition: background-color var(--theme-transition-duration);
-  }
-  
-  .theme-toggle:hover {
-    transform: none;
-  }
-}
-
-/* Theme icon state management */
-.theme-toggle .icon-sun {
-  opacity: 0;
-  transform: rotate(-90deg) scale(0);
-  position: absolute;
-  top: 8px;
-  left: 8px;
-}
-
-.theme-toggle .icon-moon {
-  opacity: 1;
-  transform: rotate(0) scale(1);
-}
-
-[data-theme="dark"] .theme-toggle .icon-sun {
-  opacity: 1;
-  transform: rotate(0) scale(1);
-}
-
-[data-theme="dark"] .theme-toggle .icon-moon {
-  opacity: 0;
-  transform: rotate(90deg) scale(0);
+  width: 1rem;          /* Reduced from 1.25rem */
+  height: 1rem;         /* Reduced from 1.25rem */
+  margin-right: 0.5rem; /* Reduced from 0.75rem */
 }
