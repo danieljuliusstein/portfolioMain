@@ -1564,8 +1564,7 @@ I build innovative solutions through software and hardware.`;
       return `Technical Skills:<br>
   • Programming: Python, JavaScript, Java, C/C++<br>
   • Machine Learning & Data Analysis<br>
-  • Web Development (HTML, CSS, JavaScript)<br>
-  • Software & Hardware Integration`;
+  • Web Development (HTML, CSS, JavaScript)<br>`;
     },
     contact: () => {
       document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' });
@@ -1592,7 +1591,7 @@ I build innovative solutions through software and hardware.`;
       navigator.clipboard.writeText(email).then(() => {
         showToast('Email copied to clipboard!');
       });
-      return `Email copied: ${email}`;
+      return ` copied: ${email}`;
     }
   };
 
