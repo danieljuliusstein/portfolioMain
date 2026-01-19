@@ -6,6 +6,17 @@
   <meta name="description" content="Portfolio showcasing creative development work and projects">
   <meta name="color-scheme" content="light dark">
   <title>Portfolio - Creative Developer</title>
+  
+  <!-- Resource Hints -->
+  <link rel="dns-prefetch" href="https://formsubmit.co">
+  <link rel="preconnect" href="https://formsubmit.co" crossorigin>
+  
+  <!-- Preload Critical Resources -->
+  <link rel="preload" href="styles.css" as="style">
+  <link rel="preload" href="main.js" as="script">
+  <link rel="preload" href="projects.json" as="fetch" crossorigin>
+  <link rel="preload" href="featured-projects.json" as="fetch" crossorigin>
+  
   <link rel="stylesheet" href="styles.css">
   <!-- Fallback for no JS -->
   <noscript>
@@ -21,30 +32,42 @@
     <!-- Copy content from icons.svg here -->
   </svg>
 
-  <a href="#main-content" class="skip-link">Skip to main content</a>
-
-  <header class="site-header">
+  <header class="site-header" role="banner">
     <div class="container">
-      <nav class="nav" aria-label="Main navigation">
+      <nav class="nav" aria-label="Main navigation" role="navigation">
         <h1 class="logo">
-          <a href="#" class="logo-link">Portfolio</a>
+          <a href="#" class="logo-link" aria-label="Portfolio home">Portfolio</a>
         </h1>
-        <!-- Update the theme toggle button -->
-        <button
-          class="theme-toggle"
-          aria-label="Toggle dark mode"
-          title="Toggle theme"
-        >
-          <!-- Include icons.svg at the top of the body -->
-          <svg class="icon icon-sun" aria-hidden="true">
-            <use href="#icon-sun"/>
-          </svg>
-          <svg class="icon icon-moon" aria-hidden="true">
-            <use href="#icon-moon"/>
-          </svg>
-        </button>
+        <div class="header-controls">
+          <button
+            id="terminal-toggle"
+            class="terminal-toggle"
+            aria-label="Toggle terminal"
+            title="Open Terminal (Ctrl+`)"
+          >
+            &gt;_
+          </button>
+          <button
+            class="cursor-trail-toggle"
+            aria-label="Toggle cursor trail effect"
+            aria-pressed="false"
+            title="Toggle cursor trail"
+          >
+            <span aria-hidden="true">✨</span>
+          </button>
+          <button
+            class="theme-toggle"
+            aria-label="Toggle between light and dark theme"
+            aria-pressed="false"
+            title="Toggle theme"
+          >
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
       </nav>
     </div>
+    <!-- Scroll Progress Indicator -->
+    <div class="scroll-progress" role="progressbar" aria-label="Page scroll progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
   </header>
 
   <main id="main-content">
@@ -53,7 +76,9 @@
         <h2 class="hero-title">
           Hi, I'm <span class="highlight">Daniel Stein</span>
         </h2>
-        <p class="hero-subtitle">Computer Engineer</p>
+        <p class="hero-subtitle">
+          <span id="typing-text"></span><span class="typing-cursor">|</span>
+        </p>
         <p class="hero-description">
           I build innovative solutions through software and hardware.
           <a href="#projects" class="text-link">View my work</a> or 
@@ -62,13 +87,46 @@
       </div>
     </section>
 
+    <!-- Featured Project Spotlight - COMMENTED OUT (uncomment when you have more projects) -->
+    <!-- <section id="featured-project" class="featured-project-section">
+      <div class="container">
+        <div class="featured-header">
+          <h2 class="section-title">Featured Project</h2>
+          <div class="featured-controls">
+            <button class="featured-nav-btn featured-prev" aria-label="Previous featured project">‹</button>
+            <div class="featured-dots" id="featured-dots"></div>
+            <button class="featured-nav-btn featured-next" aria-label="Next featured project">›</button>
+          </div>
+        </div>
+        
+        <div class="featured-carousel">
+          <div class="featured-track" id="featured-track">
+            <!-- Featured projects will be dynamically inserted -->
+          </div>
+        </div>
+      </div>
+    </section> -->
+
     <section id="projects" class="projects-section">
       <div class="container">
-        <h2 class="section-title">Projects</h2>
-        <!-- This is the required element -->
-        <div id="projects-grid" class="projects-grid">
-          <p class="loading-text">Loading projects...</p>
+        <div class="section-header">
+          <h2 class="section-title">Projects</h2>
+          <span class="hint-text">Click tags to filter</span>
         </div>
+        
+        <div class="controls">
+          <div class="filter-tags" role="group" aria-label="Filter by technology">
+            <!-- Tags will be dynamically inserted here -->
+          </div>
+        </div>
+        
+        <div id="projects-grid" class="projects-grid">
+          <!-- Skeleton loaders will be inserted here during loading -->
+        </div>
+        
+        <p id="no-results" class="no-results" hidden>
+          No projects found. <button onclick="handleResetFilters()" class="link-btn">Clear filters</button>
+        </p>
       </div>
     </section>
 
@@ -99,28 +157,164 @@
       </div>
     </section>
 
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials-section">
+      <div class="container">
+        <h2 class="section-title">Testimonials</h2>
+        <p class="section-subtitle">What others say about working with me</p>
+        
+        <div class="testimonials-carousel">
+          <button class="carousel-btn carousel-prev" aria-label="Previous testimonial">‹</button>
+          
+          <div class="testimonials-track-container">
+            <div class="testimonials-track" id="testimonials-track">
+              <!-- Testimonial 1 -->
+              <div class="testimonial-card active">
+                <div class="testimonial-content">
+                  <div class="testimonial-quote">"</div>
+                  <p class="testimonial-text">
+                    Daniel demonstrated exceptional problem-solving skills and technical expertise throughout our collaboration. 
+                    His ability to break down complex systems and communicate technical concepts clearly made him an invaluable team member.
+                  </p>
+                </div>
+                <div class="testimonial-author">
+                  <div class="author-avatar">JD</div>
+                  <div class="author-info">
+                    <div class="author-name">John Doe</div>
+                    <div class="author-title">Senior Software Engineer at Tech Corp</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Testimonial 2 -->
+              <div class="testimonial-card">
+                <div class="testimonial-content">
+                  <div class="testimonial-quote">"</div>
+                  <p class="testimonial-text">
+                    Working with Daniel on our machine learning project was a great experience. 
+                    His analytical mindset and attention to detail helped us achieve results beyond our expectations.
+                  </p>
+                </div>
+                <div class="testimonial-author">
+                  <div class="author-avatar">AS</div>
+                  <div class="author-info">
+                    <div class="author-name">Alex Smith</div>
+                    <div class="author-title">Data Science Lead at Analytics Inc</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Testimonial 3 -->
+              <div class="testimonial-card">
+                <div class="testimonial-content">
+                  <div class="testimonial-quote">"</div>
+                  <p class="testimonial-text">
+                    Daniel's dedication to learning and growth is impressive. He consistently delivers high-quality work 
+                    and approaches challenges with creativity and enthusiasm.
+                  </p>
+                </div>
+                <div class="testimonial-author">
+                  <div class="author-avatar">MJ</div>
+                  <div class="author-info">
+                    <div class="author-name">Maria Johnson</div>
+                    <div class="author-title">Professor at Georgia Tech</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="carousel-btn carousel-next" aria-label="Next testimonial">›</button>
+        </div>
+
+        <div class="carousel-dots" id="testimonial-dots">
+          <button class="dot active" aria-label="Go to testimonial 1"></button>
+          <button class="dot" aria-label="Go to testimonial 2"></button>
+          <button class="dot" aria-label="Go to testimonial 3"></button>
+        </div>
+      </div>
+    </section>
+
     <section id="contact" class="contact-section">
       <div class="container">
         <h2 class="section-title">Let's Connect</h2>
         <p class="contact-intro">
           Interested in working together? Let's talk!
         </p>
-        <div class="contact-actions">
-          <a
-            href="mailto:your.email@example.com?subject=Portfolio%20Inquiry"
-            class="btn btn-primary"
-            data-email="your.email@example.com"
-          >
-            Send Email
-          </a>
-          <button 
-            class="btn btn-secondary" 
-            id="copy-email"
-            aria-label="Copy email address to clipboard"
-          >
-            Copy Email
-          </button>
-        </div>
+        
+        <form 
+          id="contact-form" 
+          class="contact-form" 
+          action="https://formsubmit.co/dstein35@gatech.edu" 
+          method="POST"
+          novalidate
+        >
+          <!-- FormSubmit Configuration -->
+          <input type="hidden" name="_subject" value="New Portfolio Contact Form Submission">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_next" value="https://danieljuliusstein.github.io/portfolioMain/#contact">
+          
+          <div class="form-group">
+            <label for="contact-name">
+              Name <span class="required" aria-label="required">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="contact-name" 
+              name="name" 
+              required 
+              aria-required="true"
+              autocomplete="name"
+            >
+            <span class="error-message" id="name-error" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="contact-email">
+              Email <span class="required" aria-label="required">*</span>
+            </label>
+            <input 
+              type="email" 
+              id="contact-email" 
+              name="email" 
+              required 
+              aria-required="true"
+              autocomplete="email"
+            >
+            <span class="error-message" id="email-error" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="contact-message">
+              Message <span class="required" aria-label="required">*</span>
+            </label>
+            <textarea 
+              id="contact-message" 
+              name="message" 
+              rows="6" 
+              required 
+              aria-required="true"
+            ></textarea>
+            <span class="error-message" id="message-error" role="alert"></span>
+          </div>
+
+          <div class="form-actions">
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+              id="submit-btn"
+            >
+              <span class="btn-text">Send Message</span>
+              <span class="btn-loading" hidden>
+                <span class="spinner"></span>
+                Sending...
+              </span>
+            </button>
+          </div>
+
+          <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
+        </form>
       </div>
     </section>
   </main>
@@ -162,6 +356,43 @@
     hidden
   >
     <span id="toast-message"></span>
+  </div>
+
+  <!-- Back to Top Button -->
+  <button 
+    id="back-to-top" 
+    class="back-to-top" 
+    aria-label="Scroll back to top"
+    title="Back to top"
+    hidden
+  >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M12 19V5M5 12l7-7 7 7"/>
+    </svg>
+  </button>
+
+  <!-- Interactive Terminal -->
+  <div id="terminal" class="terminal" hidden>
+    <div class="terminal-header">
+      <span class="terminal-title">portfolio@terminal:~</span>
+      <button class="terminal-close" aria-label="Close terminal">×</button>
+    </div>
+    <div class="terminal-body">
+      <div class="terminal-output" id="terminal-output">
+        <div class="terminal-line">Welcome to Portfolio Terminal! Type 'help' for available commands.</div>
+      </div>
+      <div class="terminal-input-line">
+        <span class="terminal-prompt">$</span>
+        <input 
+          type="text" 
+          class="terminal-input" 
+          id="terminal-input"
+          autocomplete="off"
+          spellcheck="false"
+          aria-label="Terminal command input"
+        />
+      </div>
+    </div>
   </div>
 
   <script src="main.js" defer></script>

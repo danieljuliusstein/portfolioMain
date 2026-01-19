@@ -1,0 +1,38 @@
+[
+  {
+    "id": "diabetes-progression",
+    "title": "Diabetes Progression Analysis",
+    "description": "Developed a predictive model for diabetes progression using real-world medical datasets. Implemented regression techniques to estimate disease progression over time based on health indicators such as BMI, blood pressure, and glucose levels. The project explores data preprocessing, feature selection, and evaluation metrics to assess model performance.",
+    "technologies": ["Python", "Machine Learning", "Scikit-learn", "Pandas", "Data Analysis"],
+    "image": "images/diabetes_progression.png",
+    "imageAlt": "Detailed data visualization of medical dataset",
+    "repoUrl": "https://github.com/danieljuliusstein/diabetes-progression",
+    "demoUrl": "",
+    "featured": true,
+    "badge": "Featured"
+  },
+  {
+    "id": "portfolio-website",
+    "title": "Interactive Portfolio Website",
+    "description": "A modern, fully-featured portfolio website built with vanilla JavaScript, HTML, and CSS. Features include dark mode, cursor trail effects, interactive terminal, testimonials carousel, and comprehensive accessibility support. Demonstrates advanced front-end development skills without framework dependencies.",
+    "technologies": ["JavaScript", "HTML5", "CSS3", "Web APIs", "Accessibility"],
+    "image": "images/portfolio_preview.png",
+    "imageAlt": "Portfolio website preview",
+    "repoUrl": "https://github.com/danieljuliusstein/portfolioMain",
+    "demoUrl": "https://danieljuliusstein.github.io/portfolioMain/",
+    "featured": true,
+    "badge": "Latest"
+  },
+  {
+    "id": "sample-project-3",
+    "title": "Your Next Amazing Project",
+    "description": "This is a placeholder for your next featured project. Replace this with a real project that showcases your skills. Include details about the problem you solved, technologies used, and the impact of your work. Make it compelling!",
+    "technologies": ["Add", "Your", "Tech", "Stack", "Here"],
+    "image": "images/diabetes_progression.png",
+    "imageAlt": "Project preview image",
+    "repoUrl": "https://github.com/danieljuliusstein/your-project",
+    "demoUrl": "",
+    "featured": true,
+    "badge": "Coming Soon"
+  }
+]
