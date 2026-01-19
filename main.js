@@ -1261,7 +1261,7 @@ function initTypingAnimation() {
 
   const texts = [
   'Computer Engineer',
-  'Gym Rat',
+  'Gym Connisseur',
   'Georgia Tech Student',
   'Always Learning + Building'
 ];
@@ -1452,6 +1452,15 @@ function initScrollProgress() {
 function initCursorTrail() {
   const toggleBtn = document.querySelector('.cursor-trail-toggle');
   if (!toggleBtn) return;
+
+  // Check if device has a mouse (not touch-only)
+  const hasMouse = window.matchMedia('(pointer: fine)').matches;
+  
+  // Hide toggle button on touch devices
+  if (!hasMouse) {
+    toggleBtn.style.display = 'none';
+    return;
+  }
 
   let trailEnabled = localStorage.getItem('cursorTrail') === 'true';
   let trails = [];
