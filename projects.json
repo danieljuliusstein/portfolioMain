@@ -12,16 +12,16 @@
     "repoUrl": "https://github.com/danieljuliusstein/diabetes-progression"
   },
   {
-    "title": "Diabetes Progression Analysis",
-    "description": "Machine learning project analyzing and predicting diabetes progression based on health indicators.",
-    "longDescription": "Developed a predictive model for diabetes progression using real-world medical datasets. Implemented regression techniques to estimate disease progression over time based on health indicators such as BMI, blood pressure, and glucose levels. The project explores data preprocessing, feature selection, and evaluation metrics to assess model performance. Visualization tools highlight trends and provide interpretability for healthcare insights.",
-    "tags": ["Python", "Machine Learning", "Data Analysis"],
-    "thumbnail": "images/diabetes_progression.png",
-    "thumbnailAlt": "Medical chart and stethoscope",
-    "image": "images/diabetes_progression.png",
-    "imageAlt": "Detailed data visualization of medical dataset",
+    "title": "Password Generator Tool",
+    "description": "A secure password generator that creates strong, random passwords based on user-defined criteria.",
+    "longDescription": "This project involves building a password generator tool that allows users to specify parameters such as length, inclusion of special characters, numbers, and uppercase letters. The tool uses cryptographic libraries to ensure the randomness and security of the generated passwords. It also includes a user-friendly interface for easy interaction and options to copy the generated password to the clipboard.",
+    "tags": ["JavaScript", "PHP", "Python"],
+    "thumbnail": "images/passGenerator.png",
+    "thumbnailAlt": "Password generator interface",
+    "image": "images/passGenerator.png",
+    "imageAlt": "Password generator detailed view",
     "demoUrl": "",
-    "repoUrl": "https://github.com/danieljuliusstein/diabetes-progression"
+    "repoUrl": "https://github.com/danieljuliusstein/PassGeneratorHTML"
   }
 
 ]
