@@ -2,7 +2,6 @@
 // State Management
 // ======================
 let allProjects = [];
-window.activeTag = 'all';
 window.searchQuery = '';
 
 // ======================
@@ -138,11 +137,6 @@ async function loadProjects() {
 
     // Store projects and render
     allProjects = projects;
-    
-    // Extract and render filter tags
-    const allTags = ['all', ...new Set(projects.flatMap(p => p.tags || []))];
-    renderFilterTags(allTags);
-    
     renderProjects();
 
   } catch (error) {
@@ -176,23 +170,6 @@ function createSkeletonCards(count = 6) {
 // ======================
 // Rendering Functions
 // ======================
-function renderFilterTags(tags) {
-  const container = document.querySelector('.filter-tags');
-  container.innerHTML = tags.map(tag => `
-    <button
-      class="tag-btn ${tag === 'all' ? 'active' : ''}"
-      data-tag="${tag}"
-    >
-      ${tag === 'all' ? 'All' : tag}
-    </button>
-  `).join('');
-
-  // Add event listeners to filter buttons
-  container.querySelectorAll('.tag-btn').forEach(btn => {
-    btn.addEventListener('click', handleFilterClick);
-  });
-}
-
 function renderProjects() {
   const grid = document.getElementById('projects-grid');
   if (!grid) {
@@ -208,13 +185,12 @@ function renderProjects() {
     return;
   }
 
-  // Filter projects
+  // Filter projects (search only, if searchQuery is used)
   const filtered = allProjects.filter(project => {
-    const matchesTag = !window.activeTag || window.activeTag === 'all' || project.tags.includes(window.activeTag);
-    const matchesSearch = !window.searchQuery || 
+    const matchesSearch = !window.searchQuery ||
       project.title.toLowerCase().includes(window.searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(window.searchQuery.toLowerCase());
-    return matchesTag && matchesSearch;
+    return matchesSearch;
   });
 
   // Show no results message if needed
@@ -245,23 +221,30 @@ function renderProjects() {
     });
   });
 
-  // Add event listeners to new cards
+  // Add event listeners to new cards — navigate to project page
   grid.querySelectorAll('.view-details').forEach((btn, index) => {
-    btn.addEventListener('click', () => openModal(filtered[index]));
+    btn.addEventListener('click', () => navigateToProject(filtered[index]));
   });
+
+  // Initialize STL viewers after project cards are rendered
+  initSTLViewers();
 }
 
 function createProjectCard(project) {
-  console.log('Creating card for project:', project);
+  console.log('[createProjectCard] ', project.title, 'stlUrl=', project.stlUrl);
+
+  const hasSTL = project.stlUrl && project.stlUrl.trim() !== '';
+  const thumbnailHTML = hasSTL
+    ? `<div class="project-thumbnail stl-viewer-card" data-stl="${project.stlUrl}" style="height:200px; background:#0d1117; display:flex; align-items:center; justify-content:center;">
+        <canvas class="stl-canvas" style="width:100%; height:100%; display:block;"></canvas>
+       </div>`
+    : `<img src="${project.thumbnail}" alt="${project.thumbnailAlt || 'Project screenshot'}" class="project-thumbnail" loading="lazy">`;
+
   const card = `
     <article class="project-card">
-      <img
-        src="${project.thumbnail}"
-        alt="${project.thumbnailAlt || 'Project screenshot'}"
-        class="project-thumbnail"
-        loading="lazy"
-      >
+      ${thumbnailHTML}
       <div class="project-body">
+        ${project.discoveryProject ? '<span class="project-badge discovery-badge">Discovery Project</span>' : ''}
         <h3 class="project-title">${escapeHtml(project.title)}</h3>
         <div class="project-tags">
           ${project.tags.map(tag => `<span class="project-tag">${escapeHtml(tag)}</span>`).join('')}
@@ -286,8 +269,144 @@ function createProjectCard(project) {
       </div>
     </article>
   `;
-  console.log('Created card HTML:', card);
   return card;
+}
+
+function initSTLCanvas(canvas, stlUrl) {
+  if (!window.THREE || !canvas || !stlUrl) return;
+
+  // Use the parent container's dimensions for reliable sizing
+  const container = canvas.parentElement;
+  const W = () => container ? container.clientWidth || 400 : 400;
+  const H = () => container ? container.clientHeight || 200 : 200;
+
+  // Set canvas pixel size explicitly before creating renderer
+  canvas.width = W();
+  canvas.height = H();
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(W(), H(), false); // false = don't set CSS size (we do it via CSS)
+  renderer.setClearColor(0x0d1117, 1);
+
+  // Handle resize
+  const ro = new ResizeObserver(() => {
+    const w = W(), h = H();
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  });
+  if (container) ro.observe(container);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, W() / H(), 0.1, 2000);
+  camera.position.set(0, 15, 90);
+  camera.lookAt(0, -8, 0);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+  const key = new THREE.DirectionalLight(0xffffff, 0.9);
+  key.position.set(60, 80, 60);
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0x3b82f6, 0.35);
+  fill.position.set(-60, -20, -40);
+  scene.add(fill);
+
+  const pivot = new THREE.Group();
+  scene.add(pivot);
+  let rotY = 0;
+  let rotX = 0.3;
+
+  fetch(stlUrl)
+    .then(r => {
+      if (!r.ok) throw new Error(`STL fetch failed: ${r.status}`);
+      return r.arrayBuffer();
+    })
+    .then(buf => {
+      const view = new DataView(buf);
+      const numTri = view.getUint32(80, true);
+      const pos = [];
+      const nor = [];
+      let off = 84;
+
+      for (let i = 0; i < numTri; i++) {
+        const nx = view.getFloat32(off, true);
+        const ny = view.getFloat32(off + 4, true);
+        const nz = view.getFloat32(off + 8, true);
+        off += 12;
+
+        for (let v = 0; v < 3; v++) {
+          pos.push(view.getFloat32(off, true), view.getFloat32(off + 4, true), view.getFloat32(off + 8, true));
+          nor.push(nx, ny, nz);
+          off += 12;
+        }
+
+        off += 2;
+      }
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pos), 3));
+      geo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(nor), 3));
+      geo.computeBoundingBox();
+
+      const b = geo.boundingBox;
+      geo.translate(-(b.min.x + b.max.x) / 2, -(b.min.y + b.max.y) / 2, -(b.min.z + b.max.z) / 2);
+
+      const mesh = new THREE.Mesh(
+        geo,
+        new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.55, roughness: 0.35 })
+      );
+      mesh.rotation.x = -Math.PI / 2;
+      pivot.add(mesh);
+      pivot.position.y = 8;
+    })
+    .catch(error => {
+      console.error('STL load error:', error);
+    });
+
+  // Drag to rotate
+  let dragging = false;
+  let lastX = 0;
+
+  canvas.addEventListener('mousedown', (e) => {
+    dragging = true;
+    lastX = e.clientX;
+  });
+  window.addEventListener('mouseup', () => {
+    dragging = false;
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    rotY += (e.clientX - lastX) * 0.012;
+    lastX = e.clientX;
+  });
+
+  function animate() {
+    requestAnimationFrame(animate);
+    rotY += 0.006;
+    pivot.rotation.set(rotX, rotY, 0);
+    renderer.render(scene, camera);
+  }
+
+  animate();
+}
+
+function initSTLViewers() {
+  if (!window.THREE) {
+    console.warn('Three.js not loaded — STL viewer cannot initialize');
+    return;
+  }
+  // Wait two frames so the grid has painted and clientWidth is real
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.stl-viewer-card').forEach(card => {
+        const canvas = card.querySelector('.stl-canvas');
+        const stlUrl = card.dataset.stl;
+        if (canvas && stlUrl) {
+          initSTLCanvas(canvas, stlUrl);
+        }
+      });
+    });
+  });
 }
 
 // ======================
@@ -303,17 +422,32 @@ function openModal(project) {
   // Save the currently focused element
   lastActiveElement = document.activeElement;
   
+  const modalContent = project.sections && project.sections.length > 0
+    ? project.sections.map(s => `
+        <div class="modal-section">
+          <h3 class="modal-section-heading">${escapeHtml(s.heading)}</h3>
+          <p class="modal-section-content">${escapeHtml(s.content)}</p>
+        </div>
+      `).join('')
+    : `<p class="modal-description">${escapeHtml(project.longDescription)}</p>`;
+
+  const visualContent = project.stlUrl && project.stlUrl.trim() !== ''
+    ? `<div class="modal-stl-viewer" style="width:100%; height:400px; background:#0d1117; display:flex; align-items:center; justify-content:center; margin-bottom:1rem;">
+         <canvas class="modal-stl-canvas" style="width:100%; height:100%; display:block;"></canvas>
+       </div>`
+    : project.image
+      ? `<img
+          src="${project.image}"
+          alt="${project.imageAlt || 'Project detail view'}"
+          class="modal-image"
+          loading="lazy"
+        >`
+      : '';
+
   modalBody.innerHTML = `
-    ${project.image ? `
-      <img
-        src="${project.image}"
-        alt="${project.imageAlt || 'Project detail view'}"
-        class="modal-image"
-        loading="lazy"
-      >
-    ` : ''}
+    ${visualContent}
     <h2 class="modal-title" id="modal-title">${escapeHtml(project.title)}</h2>
-    <p class="modal-description">${escapeHtml(project.longDescription)}</p>
+    ${modalContent}
     <div class="modal-actions">
       ${project.demoUrl ? `
         <a
@@ -337,6 +471,11 @@ function openModal(project) {
       ` : ''}
     </div>
   `;
+
+  if (project.stlUrl && project.stlUrl.trim() !== '') {
+    const modalCanvas = document.querySelector('.modal-stl-canvas');
+    initSTLCanvas(modalCanvas, project.stlUrl);
+  }
 
   modal.hidden = false;
   document.body.style.overflow = 'hidden';
@@ -410,22 +549,8 @@ function setupModalFocusTrap(modal) {
 // ======================
 // Event Handlers
 // ======================
-function handleFilterClick(e) {
-  const tag = e.target.dataset.tag;
-  if (!tag) return;
-
-  activeTag = tag;
-
-  // Update active state
-  document.querySelectorAll('.tag-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tag === tag);
-  });
-
-  renderProjects();
-}
-
 function handleSearch(e) {
-  searchQuery = e.target.value;
+  window.searchQuery = e.target.value;
   renderProjects();
 }
 
@@ -436,12 +561,9 @@ function handleModalKeydown(e) {
 }
 
 function handleResetFilters() {
-  activeTag = 'all';
-  searchQuery = '';
-  document.getElementById('search-input').value = '';
-  document.querySelectorAll('.tag-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tag === 'all');
-  });
+  window.searchQuery = '';
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) searchInput.value = '';
   renderProjects();
 }
 
@@ -729,6 +851,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize testimonials carousel
   initTestimonials();
 
+  // Initialize career goals phase tabs
+  initCareerGoalsPhaseTabs();
+
   // Initialize featured projects - COMMENTED OUT (uncomment when you have more projects)
   // loadFeaturedProjects();
 
@@ -738,14 +863,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Register service worker for offline capability
   registerServiceWorker();
 
-  // Load projects
-  loadProjects().catch(error => {
+  // Load projects then check for deep link
+  loadProjects().then(() => {
+    router();
+  }).catch(error => {
     console.error('Failed to load projects:', error);
   });
 
-  // Add event listeners
-  elements.themeToggle.addEventListener('click', toggleTheme);
-  
   // Add copy email button listener (if it still exists)
   const copyEmailBtn = document.getElementById('copy-email');
   if (copyEmailBtn) {
@@ -925,7 +1049,7 @@ function initScrollAnimations() {
   if (prefersReducedMotion) return;
 
   // Select all sections to animate
-  const sections = document.querySelectorAll('.hero, .projects-section, .resume-section, .contact-section');
+  const sections = document.querySelectorAll('.hero, .about-section, .career-goals-section, .projects-section, .resume-section, .testimonials-section, .contact-section');
   
   // Create intersection observer
   const observer = new IntersectionObserver((entries) => {
@@ -945,6 +1069,31 @@ function initScrollAnimations() {
   sections.forEach(section => {
     section.classList.add('animate-on-scroll');
     observer.observe(section);
+  });
+}
+
+// ======================
+// Career Goals Phase Tabs
+// ======================
+function initCareerGoalsPhaseTabs() {
+  const tabs = document.querySelectorAll('.phase-tab');
+  const items = document.querySelectorAll('.tl-item[data-phase]');
+
+  if (!tabs.length || !items.length) return;
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+      const filter = tab.dataset.filter;
+      items.forEach((item) => {
+        if (filter === 'all' || item.dataset.phase === filter) {
+          item.classList.remove('hidden');
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+    });
   });
 }
 
@@ -1252,68 +1401,43 @@ function initFeaturedCarousel() {
 }
 
 // ======================
-// Typing Animation with Rotation
+// Typing Animation — type once, cursor fades
 // ======================
 function initTypingAnimation() {
   const typingElement = document.getElementById('typing-text');
   const subtitleElement = document.querySelector('.hero-subtitle');
   if (!typingElement || !subtitleElement) return;
 
-  const texts = [
-  'Computer Engineer',
-  'Gym Connisseur',
-  'Georgia Tech Student',
-  'Always Learning + Building'
-];
+  // Single phrase — your professional identity, front and center
+  const finalText = 'I build things. Sometimes they work.';
 
-  
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // If user prefers reduced motion, show first text immediately
   if (prefersReducedMotion) {
-    typingElement.textContent = texts[0];
+    typingElement.textContent = finalText;
     subtitleElement.classList.add('typing-complete');
     return;
   }
 
-  let textIndex = 0;
   let charIndex = 0;
-  let isDeleting = false;
-  const typeSpeed = 30; // typing speed
-  const deleteSpeed = 30; // backspace speed
-  const pauseAfterType = 4000; // pause after typing complete word
-  const pauseAfterDelete = 700; // pause after deleting complete word
+  const typeSpeed = 45; // slightly slower = feels more deliberate
 
   function type() {
-    const currentText = texts[textIndex];
-    
-    if (!isDeleting && charIndex < currentText.length) {
-      // Typing forward
-      typingElement.textContent = currentText.substring(0, charIndex + 1);
+    if (charIndex < finalText.length) {
+      typingElement.textContent = finalText.substring(0, charIndex + 1);
       charIndex++;
       setTimeout(type, typeSpeed);
-    } else if (!isDeleting && charIndex === currentText.length) {
-      // Finished typing, pause then start deleting
+    } else {
+      // Done typing — mark complete (cursor solid for a moment)
       subtitleElement.classList.add('typing-complete');
+
+      // After 1.5s, fade the cursor out entirely
       setTimeout(() => {
-        isDeleting = true;
-        subtitleElement.classList.remove('typing-complete');
-        type();
-      }, pauseAfterType);
-    } else if (isDeleting && charIndex > 0) {
-      // Deleting backwards
-      typingElement.textContent = currentText.substring(0, charIndex - 1);
-      charIndex--;
-      setTimeout(type, deleteSpeed);
-    } else if (isDeleting && charIndex === 0) {
-      // Finished deleting, move to next text
-      isDeleting = false;
-      textIndex = (textIndex + 1) % texts.length; // Loop through texts
-      setTimeout(type, pauseAfterDelete);
+        subtitleElement.classList.add('cursor-done');
+      }, 1500);
     }
   }
 
-  // Start typing after initial delay
   setTimeout(type, 500);
 }
 
@@ -1543,6 +1667,8 @@ function initTerminal() {
       return `Available commands:<br>
   help        - Show this help message<br>
   about       - Learn about me<br>
+  career      - View career goals<br>
+  goals       - View career goals<br>
   projects    - View my projects<br>
   skills      - List my skills<br>
   contact     - Get contact information<br>
@@ -1553,8 +1679,16 @@ function initTerminal() {
   email       - Copy email to clipboard`;
     },
     about: () => {
-      return `Hi! I'm Daniel Stein, a Computer Engineer from Georgia Tech.<br>
-I build innovative solutions through software and hardware.`;
+      document.querySelector('#about')?.scrollIntoView({ behavior: 'smooth' });
+      return 'Navigating to about section...';
+    },
+    career: () => {
+      document.querySelector('#career-goals')?.scrollIntoView({ behavior: 'smooth' });
+      return 'Navigating to career goals...';
+    },
+    goals: () => {
+      document.querySelector('#career-goals')?.scrollIntoView({ behavior: 'smooth' });
+      return 'Navigating to career goals...';
     },
     projects: () => {
       document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' });
@@ -1688,3 +1822,130 @@ I build innovative solutions through software and hardware.`;
     }
   });
 }
+
+// ======================
+// Client-Side Router
+// ======================
+// Always look up at call time so the DOM is ready
+function getMainContent() {
+  return document.getElementById('main-content');
+}
+
+function router() {
+  const hash = window.location.hash;
+  const match = hash.match(/^#\/project\/(.+)$/);
+  if (match) {
+    const projectId = decodeURIComponent(match[1]);
+    const project = allProjects.find(p => p.id === projectId);
+    if (project) {
+      renderProjectPage(project);
+      return;
+    }
+  }
+  // Default — show normal homepage
+  showHomePage();
+}
+
+function navigateToProject(project) {
+  window.location.hash = `/project/${encodeURIComponent(project.id)}`;
+}
+
+function showHomePage() {
+  const page = document.getElementById('project-page');
+  if (page) page.remove();
+  const mc = getMainContent();
+  if (mc) mc.style.display = '';
+  document.title = 'Portfolio - Daniel Stein';
+  window.scrollTo(0, 0);
+}
+
+function renderProjectPage(project) {
+  // Hide main content, show project page
+  const mc = getMainContent();
+  if (mc) mc.style.display = 'none';
+
+  // Remove existing project page if any
+  const existing = document.getElementById('project-page');
+  if (existing) existing.remove();
+
+  const stlViewer = project.stlUrl
+    ? `<div class="pp-stl-container">
+        <canvas class="pp-stl-canvas"></canvas>
+        <p class="pp-stl-hint">Drag to rotate</p>
+       </div>`
+    : project.image
+      ? `<img src="${project.image}" alt="${escapeHtml(project.imageAlt || project.title)}" class="pp-hero-image">`
+      : '';
+
+  const sections = (project.sections || []).map((s, i) => `
+    <div class="pp-section" style="animation-delay:${i * 60}ms">
+      <h2 class="pp-section-heading">${escapeHtml(s.heading)}</h2>
+      <p class="pp-section-content">${escapeHtml(s.content)}</p>
+    </div>
+  `).join('');
+
+  const tags = (project.tags || []).map(t =>
+    `<span class="project-tag">${escapeHtml(t)}</span>`
+  ).join('');
+
+  const actions = [
+    project.demoUrl ? `<a href="${project.demoUrl}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Live Demo</a>` : '',
+    project.repoUrl ? `<a href="${project.repoUrl}" class="btn btn-outline" target="_blank" rel="noopener noreferrer">View Code</a>` : ''
+  ].filter(Boolean).join('');
+
+  const page = document.createElement('div');
+  page.id = 'project-page';
+  page.innerHTML = `
+    <div class="pp-back-bar">
+      <div class="container">
+        <button class="pp-back-btn" id="pp-back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" width="16" height="16"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          Back to Projects
+        </button>
+      </div>
+    </div>
+
+    <div class="pp-hero">
+      <div class="container pp-hero-inner">
+        <div class="pp-hero-text">
+          ${project.discoveryProject ? '<span class="project-badge discovery-badge">Discovery Project</span>' : ''}
+          <h1 class="pp-title">${escapeHtml(project.title)}</h1>
+          <p class="pp-description">${escapeHtml(project.description)}</p>
+          <div class="pp-tags">${tags}</div>
+          ${actions ? `<div class="pp-actions">${actions}</div>` : ''}
+        </div>
+        <div class="pp-hero-visual">
+          ${stlViewer}
+        </div>
+      </div>
+    </div>
+
+    <div class="pp-body">
+      <div class="container pp-sections">
+        ${sections}
+      </div>
+    </div>
+  `;
+
+  document.body.insertBefore(page, document.getElementById('project-modal'));
+  document.title = `${project.title} — Daniel Stein`;
+  window.scrollTo(0, 0);
+
+  // Back button
+  document.getElementById('pp-back-btn').addEventListener('click', () => {
+    history.back();
+  });
+
+  // Init STL if needed
+  if (project.stlUrl) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const canvas = page.querySelector('.pp-stl-canvas');
+        if (canvas && window.THREE) initSTLCanvas(canvas, project.stlUrl);
+      });
+    });
+  }
+}
+
+// Wire up hash routing
+window.addEventListener('hashchange', router);

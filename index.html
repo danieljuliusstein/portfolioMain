@@ -15,7 +15,6 @@
   <link rel="preload" href="styles.css" as="style">
   <link rel="preload" href="main.js" as="script">
   <link rel="preload" href="projects.json" as="fetch" crossorigin>
-  <link rel="preload" href="featured-projects.json" as="fetch" crossorigin>
   
   <link rel="stylesheet" href="styles.css">
   <!-- Fallback for no JS -->
@@ -23,7 +22,7 @@
     <style>
       .projects-grid { display: block !important; }
       .loading-text, .modal, .toast, .theme-toggle { display: none !important; }
-      .search-wrapper, .filter-tags { opacity: 0.5; pointer-events: none; }
+      .search-wrapper { opacity: 0.5; pointer-events: none; }
     </style>
   </noscript>
 </head>
@@ -38,6 +37,13 @@
         <h1 class="logo">
           <a href="#" class="logo-link" aria-label="Portfolio home">Portfolio</a>
         </h1>
+        <nav class="nav-links" aria-label="Page sections">
+          <a href="#about">About</a>
+          <a href="#career-goals">Career Goals</a>
+          <a href="#projects">Projects</a>
+          <a href="#resume">Resume</a>
+          <a href="#contact">Contact</a>
+        </nav>
         <div class="header-controls">
           <button
             id="terminal-toggle"
@@ -87,6 +93,148 @@
       </div>
     </section>
 
+    <section id="about" class="about-section">
+      <div class="container">
+        <h2 class="section-title">About Me</h2>
+        <div class="about-content">
+          <div class="about-image">
+            <img src="images/headshot.jpg" alt="Daniel Stein headshot" />
+          </div>
+          <div class="about-text">
+            <p>I’m a Computer Engineering student at Georgia Tech with a strong interest in software development, especially in areas where software interacts closely with hardware. 
+            <p> My focus is on developing a solid foundation in systems programming, computer architecture, and performance-oriented software. </p>     
+            <p> I’m always looking to deepen my understanding by building and refining projects that push me to think critically and write clean, effective code. </p>    
+            <p> Outside of engineering, I spend a lot of time in the gym, which has helped me build discipline, consistency, and a strong work ethic—qualities I bring into my technical work every day. I’m always looking for ways to grow, improve, and take on new challenges.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="career-goals" class="career-goals-section">
+      <div class="container career-goals-wrapper">
+        <p class="career-section-label">Where I'm Headed</p>
+        <h2 class="section-title">Career Goals</h2>
+        <p class="career-intro">I'm building toward entrepreneurship — gaining technical depth and real-world experience first, then launching my own venture. Here's the roadmap.</p>
+
+        <div class="phase-tabs" role="group" aria-label="Filter timeline by phase">
+          <button type="button" class="phase-tab active" data-filter="all">All phases</button>
+          <button type="button" class="phase-tab" data-filter="done">Completed</button>
+          <button type="button" class="phase-tab" data-filter="now">In progress</button>
+          <button type="button" class="phase-tab" data-filter="future">Future</button>
+        </div>
+
+        <div class="career-timeline">
+          <div class="tl-item" data-phase="done">
+            <div class="tl-dot done" aria-hidden="true"></div>
+            <div class="tl-card">
+              <div class="tl-meta">
+                <span class="tl-badge badge-done">Completed</span>
+                <span class="tl-period">Fall 2024 — Spring 2025</span>
+              </div>
+              <h3>Foundations & First Projects</h3>
+              <p>Entered Georgia Tech's ECE program and began building. Completed ECE 1100 Discovery Studio, developed independent projects, and learned to ship working software from scratch.</p>
+              <ul class="tl-steps">
+                <li>Enrolled in ECE 1100 Discovery Studio</li>
+                <li>Built and deployed full-stack projects independently</li>
+                <li>Launched personal portfolio site</li>
+                <li>Learned Python data science stack: NumPy, Pandas, scikit-learn</li>
+              </ul>
+              <div class="tl-progress-wrap">
+                <div class="tl-progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><div class="tl-progress-fill fill-done" style="width: 100%"></div></div>
+                <span class="tl-pct">100%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-item" data-phase="now">
+            <div class="tl-dot now" aria-hidden="true"></div>
+            <div class="tl-card">
+              <div class="tl-meta">
+                <span class="tl-badge badge-now">In Progress</span>
+                <span class="tl-period">Now — Spring 2026</span>
+              </div>
+              <h3>Short-term: Build Skills & Explore</h3>
+              <p>Deepening technical fundamentals and exploring entrepreneurship ecosystems. Learning what it takes to build and ship products people want.</p>
+              <ul class="tl-steps">
+                <li>Complete core ECE courses (Digital Systems, Circuit Analysis)</li>
+                <li>Explore Create-X and GT entrepreneurship resources</li>
+                <li>Join a student org — IEEE, RoboJackets, or startup club</li>
+                <li>Build the ESP32 mini drone (Discovery Project)</li>
+                <li>Take intro business or entrepreneurship course if available</li>
+              </ul>
+              <div class="tl-progress-wrap">
+                <div class="tl-progress-bar" role="progressbar" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"><div class="tl-progress-fill fill-now" style="width: 35%"></div></div>
+                <span class="tl-pct">35%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-item" data-phase="future">
+            <div class="tl-dot future" aria-hidden="true"></div>
+            <div class="tl-card">
+              <div class="tl-meta">
+                <span class="tl-badge badge-future">Planned</span>
+                <span class="tl-period">Years 2–3 · 2026–2027</span>
+              </div>
+              <h3>Medium-term: Startup Experience</h3>
+              <p>Gain hands-on experience at startups or through Create-X. Validate ideas, learn how products get built and shipped, and build a network in the startup world.</p>
+              <ul class="tl-steps">
+                <li>Secure internship at a startup or high-growth company</li>
+                <li>Participate in Create-X or similar accelerator program</li>
+                <li>Launch a side project or MVP with real users</li>
+                <li>Complete upper-division ECE thread courses</li>
+              </ul>
+              <div class="tl-progress-wrap">
+                <div class="tl-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="tl-progress-fill fill-future" style="width: 0%"></div></div>
+                <span class="tl-pct">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-item" data-phase="future">
+            <div class="tl-dot future" aria-hidden="true"></div>
+            <div class="tl-card">
+              <div class="tl-meta">
+                <span class="tl-badge badge-future">Vision</span>
+                <span class="tl-period">Post-graduation · 2028+</span>
+              </div>
+              <h3>Long-term: Founder & Entrepreneur</h3>
+              <p>My goal is to start my own company — building products that solve real problems. I plan to gain industry experience first, then either join a founding team or launch my own venture.</p>
+              <ul class="tl-steps">
+                <li>Work 3–5 years at a startup or scale-up to learn the ropes</li>
+                <li>Identify a problem worth solving through hands-on experience</li>
+                <li>Optionally pursue an MBA or entrepreneurship program part-time</li>
+                <li>Launch my own company or co-found with the right team</li>
+              </ul>
+              <div class="tl-progress-wrap">
+                <div class="tl-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="tl-progress-fill fill-future" style="width: 0%"></div></div>
+                <span class="tl-pct">0%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="goal-summary">
+          <div class="gs-item">
+            <div class="gs-num">4</div>
+            <div class="gs-label">Milestones</div>
+          </div>
+          <div class="gs-item">
+            <div class="gs-num">~4 yr</div>
+            <div class="gs-label">Horizon</div>
+          </div>
+          <div class="gs-item">
+            <div class="gs-num">2028</div>
+            <div class="gs-label">Target graduation</div>
+          </div>
+          <div class="gs-item">
+            <div class="gs-num">Founder</div>
+            <div class="gs-label">End goal</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Featured Project Spotlight - COMMENTED OUT (uncomment when you have more projects) -->
     <!-- <section id="featured-project" class="featured-project-section">
       <div class="container">
@@ -101,32 +249,21 @@
         
         <div class="featured-carousel">
           <div class="featured-track" id="featured-track">
-          Featured projects will be dynamically inserted -->
+            Featured projects will be dynamically inserted
           </div>
         </div>
       </div>
-    </section>
+    </section> -->
 
     <section id="projects" class="projects-section">
       <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">Projects</h2>
-          <span class="hint-text">Click tags to filter</span>
-        </div>
-        
-        <div class="controls">
-          <div class="filter-tags" role="group" aria-label="Filter by technology">
-            <!-- Tags will be dynamically inserted here -->
-          </div>
-        </div>
+        <h2 class="section-title">Projects</h2>
         
         <div id="projects-grid" class="projects-grid">
           <!-- Skeleton loaders will be inserted here during loading -->
         </div>
         
-        <p id="no-results" class="no-results" hidden>
-          No projects found. <button onclick="handleResetFilters()" class="link-btn">Clear filters</button>
-        </p>
+        <p id="no-results" class="no-results" hidden>No projects found.</p>
       </div>
     </section>
 
@@ -253,7 +390,7 @@
           <input type="hidden" name="_subject" value="New Portfolio Contact Form Submission">
           <input type="hidden" name="_captcha" value="false">
           <input type="hidden" name="_template" value="table">
-          <input type="hidden" name="_next" value="https://danieljuliusstein.github.io/portfolioMain/#contact">
+          <input type="hidden" name="_next" value="https://dstein-site.danieljuliusstein.workers.dev/#contact">
           
           <div class="form-group">
             <label for="contact-name">
@@ -395,6 +532,7 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="main.js" defer></script>
 </body>
 </html>

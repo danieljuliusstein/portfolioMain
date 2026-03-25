@@ -16,7 +16,7 @@
     "title": "Interactive Portfolio Website",
     "description": "A modern, fully-featured portfolio website built with vanilla JavaScript, HTML, and CSS. Features include dark mode, cursor trail effects, interactive terminal, testimonials carousel, and comprehensive accessibility support. Demonstrates advanced front-end development skills without framework dependencies.",
     "technologies": ["JavaScript", "HTML5", "CSS3", "Web APIs", "Accessibility"],
-    "image": "images/portfolio_preview.png",
+    "image": "images/portfolioImage.png",
     "imageAlt": "Portfolio website preview",
     "repoUrl": "https://github.com/danieljuliusstein/portfolioMain",
     "demoUrl": "https://danieljuliusstein.github.io/portfolioMain/",
