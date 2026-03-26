@@ -2,6 +2,38 @@
 // State Management
 // ======================
 let allProjects = [];
+// ======================
+// Edit Auth (URL Passphrase)
+// ======================
+let _editAuthorized = null; // null = not yet checked, true/false after check
+
+async function checkEditAuth() {
+  if (_editAuthorized !== null) return _editAuthorized;
+  const params = new URLSearchParams(window.location.search);
+  const phrase = params.get('edit');
+  if (!phrase) {
+    _editAuthorized = false;
+    return false;
+  }
+  try {
+    const buf = await crypto.subtle.digest(
+      'SHA-256',
+      new TextEncoder().encode(phrase)
+    );
+    const hash = Array.from(new Uint8Array(buf))
+      .map((b) => b.toString(16).padStart(2, '0')).join('');
+    // Hash for passphrase: founder-mode-2026
+    _editAuthorized = (hash === '80785bac4945d316041a015be7d1a09d1d4c4a8c41960cfba19f24975ebc5f76');
+  } catch {
+    _editAuthorized = false;
+  }
+  // Strip the param from the URL bar immediately so it isn't visible
+  if (_editAuthorized) {
+    history.replaceState({}, '', window.location.pathname + window.location.hash);
+  }
+  return _editAuthorized;
+}
+
 window.searchQuery = '';
 
 // ======================
@@ -546,25 +578,10 @@ function setupModalFocusTrap(modal) {
   });
 }
 
-// ======================
-// Event Handlers
-// ======================
-function handleSearch(e) {
-  window.searchQuery = e.target.value;
-  renderProjects();
-}
-
 function handleModalKeydown(e) {
   if (e.key === 'Escape') {
     closeModal();
   }
-}
-
-function handleResetFilters() {
-  window.searchQuery = '';
-  const searchInput = document.getElementById('search-input');
-  if (searchInput) searchInput.value = '';
-  renderProjects();
 }
 
 // ======================
@@ -761,12 +778,6 @@ function escapeHtml(text) {
 // Keyboard Shortcuts
 // ======================
 function handleGlobalKeydown(e) {
-  // Press '/' to focus search
-  if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
-    e.preventDefault();
-    document.getElementById('search-input').focus();
-  }
-
   // Press 'T' to toggle theme
   if (e.key === 't' || e.key === 'T') {
     if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
@@ -1877,12 +1888,7 @@ function renderProjectPage(project) {
       ? `<img src="${project.image}" alt="${escapeHtml(project.imageAlt || project.title)}" class="pp-hero-image">`
       : '';
 
-  const sections = (project.sections || []).map((s, i) => `
-    <div class="pp-section" style="animation-delay:${i * 60}ms">
-      <h2 class="pp-section-heading">${escapeHtml(s.heading)}</h2>
-      <p class="pp-section-content">${escapeHtml(s.content)}</p>
-    </div>
-  `).join('');
+  const sectionsHtml = renderBlocks(project);
 
   const tags = (project.tags || []).map(t =>
     `<span class="project-tag">${escapeHtml(t)}</span>`
@@ -1922,12 +1928,38 @@ function renderProjectPage(project) {
 
     <div class="pp-body">
       <div class="container pp-sections">
-        ${sections}
+        <div class="pp-block-area" id="pp-block-area">
+          ${sectionsHtml}
+        </div>
       </div>
     </div>
   `;
 
   document.body.insertBefore(page, document.getElementById('project-modal'));
+  // Check auth and conditionally render Edit button
+  checkEditAuth().then((authorized) => {
+    if (!authorized) return;
+
+    // Find or create the edit button in the pp-hero-text area
+    const heroText = page.querySelector('.pp-hero-text');
+    if (!heroText) return;
+
+    const editBtn = document.createElement('button');
+    editBtn.id = 'pp-edit-btn';
+    editBtn.className = 'btn btn-outline pp-edit-btn';
+    editBtn.textContent = '✏ Edit';
+    editBtn._editHandler = () => switchProjectPageToEditMode(project);
+    editBtn.addEventListener('click', editBtn._editHandler);
+
+    // Insert after pp-actions div if it exists, otherwise append to heroText
+    const actionsDiv = heroText.querySelector('.pp-actions');
+    if (actionsDiv) {
+      actionsDiv.after(editBtn);
+    } else {
+      heroText.appendChild(editBtn);
+    }
+  });
+
   document.title = `${project.title} — Daniel Stein`;
   window.scrollTo(0, 0);
 
@@ -1945,6 +1977,357 @@ function renderProjectPage(project) {
       });
     });
   }
+}
+
+// ======================
+// Block Editor
+// ======================
+function renderBlocks(project) {
+  const blocks = project.blocks && project.blocks.length > 0
+    ? project.blocks
+    : [{
+      id: 'b0',
+      type: 'text-only',
+      title: '',
+      text: project.description || '',
+      img: null
+    }];
+
+  return `<div class="blocks-container">
+    ${blocks.map((block) => renderBlockView(block)).join('')}
+  </div>`;
+}
+
+function renderBlockView(block) {
+  const imgHtml = block.img
+    ? `<img src="${block.img}" alt="${escapeHtml(block.title || 'Block image')}" style="width:100%;border-radius:var(--border-radius);display:block;">`
+    : `<div class="block-img-placeholder">No image</div>`;
+
+  const textHtml = `
+    ${block.title ? `<h3 class="block-view-title">${escapeHtml(block.title)}</h3>` : ''}
+    <p class="block-view-text">${escapeHtml(block.text || '')}</p>
+  `;
+
+  switch (block.type) {
+    case 'img-text-left':
+      return `<div class="block-layout img-left">
+        <div class="block-img">${imgHtml}</div>
+        <div class="block-text">${textHtml}</div>
+      </div>`;
+    case 'img-text-right':
+      return `<div class="block-layout img-right">
+        <div class="block-img">${imgHtml}</div>
+        <div class="block-text">${textHtml}</div>
+      </div>`;
+    case 'full-img':
+      return `<div class="block-full-img">${imgHtml}</div>`;
+    case 'text-only':
+    default:
+      return `<div class="block-text-only">${textHtml}</div>`;
+  }
+}
+
+function renderBlockEditor(project, container) {
+  // Work on a deep copy so Cancel can restore original
+  const workingBlocks = JSON.parse(JSON.stringify(
+    project.blocks && project.blocks.length > 0
+      ? project.blocks
+      : [{ id: 'b0', type: 'text-only', title: '', text: project.description || '', img: null }]
+  ));
+
+  function generateId() {
+    return 'b' + Date.now() + Math.random().toString(36).slice(2, 6);
+  }
+
+  function addBlock(type) {
+    workingBlocks.push({ id: generateId(), type, title: '', text: '', img: null });
+    redraw();
+  }
+
+  function removeBlock(id) {
+    const idx = workingBlocks.findIndex((b) => b.id === id);
+    if (idx !== -1) workingBlocks.splice(idx, 1);
+    redraw();
+  }
+
+  function duplicateBlock(id) {
+    const idx = workingBlocks.findIndex((b) => b.id === id);
+    if (idx === -1) return;
+    const copy = JSON.parse(JSON.stringify(workingBlocks[idx]));
+    copy.id = generateId();
+    workingBlocks.splice(idx + 1, 0, copy);
+    redraw();
+  }
+
+  function setBlockType(id, type) {
+    const block = workingBlocks.find((b) => b.id === id);
+    if (block) block.type = type;
+    redraw();
+  }
+
+  function redraw() {
+    renderEditorUI();
+    attachEditorEvents();
+  }
+
+  // ---- Drag state ----
+  let dragSrcId = null;
+
+  function renderEditorUI() {
+    container.innerHTML = `
+      <div class="editor-toolbar">
+        <span class="editor-toolbar-label">Add block:</span>
+        <button class="tb-btn" data-add="img-text-left">+ Image + Text</button>
+        <button class="tb-btn" data-add="text-only">+ Text Only</button>
+        <button class="tb-btn" data-add="full-img">+ Full-width Image</button>
+      </div>
+      <div class="block-editor" id="block-editor-list">
+        ${workingBlocks.map((block) => renderBlockEditorCard(block)).join('')}
+      </div>
+      <div class="editor-save-bar">
+        <button class="btn btn-primary" id="editor-save-btn">Save</button>
+        <button class="btn btn-outline" id="editor-cancel-btn">Cancel</button>
+      </div>
+    `;
+  }
+
+  function renderBlockEditorCard(block) {
+    const isImgType = block.type === 'img-text-left' || block.type === 'img-text-right';
+    const isFullImg = block.type === 'full-img';
+
+    const layoutToggle = isImgType ? `
+      <div class="layout-toggle">
+        <button class="lt-btn ${block.type === 'img-text-left' ? 'active' : ''}" data-layout="img-text-left" data-block-id="${block.id}">Img left</button>
+        <button class="lt-btn ${block.type === 'img-text-right' ? 'active' : ''}" data-layout="img-text-right" data-block-id="${block.id}">Img right</button>
+      </div>` : '';
+
+    const typeLabel = {
+      'img-text-left': 'Image + Text',
+      'img-text-right': 'Image + Text',
+      'full-img': 'Full-width Image',
+      'text-only': 'Text Only'
+    }[block.type] || 'Block';
+
+    const imgSlot = (isImgType || isFullImg) ? `
+      <div class="img-upload-slot ${block.img ? 'has-img' : ''}" data-block-id="${block.id}" data-upload-slot>
+        ${block.img
+          ? `<img src="${block.img}" alt="Block image" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:6px;">
+             <div class="img-change-overlay"><span>Change image</span></div>`
+          : `<div class="slot-label">Click to upload</div>`
+        }
+        <input type="file" accept="image/*" style="display:none;" data-file-input="${block.id}">
+      </div>` : '';
+
+    const textFields = block.type !== 'full-img' ? `
+      <div contenteditable="true" class="block-title-edit" data-field="title" data-block-id="${block.id}" data-placeholder="Block title (optional)">${escapeHtml(block.title || '')}</div>
+      <div contenteditable="true" class="block-text-edit" data-field="text" data-block-id="${block.id}" data-placeholder="Add text...">${escapeHtml(block.text || '')}</div>
+    ` : '';
+
+    const bodyContent = isImgType
+      ? `<div class="editor-block-two-col ${block.type === 'img-text-right' ? 'img-right' : 'img-left'}">${imgSlot}<div class="editor-block-text-col">${textFields}</div></div>`
+      : `${imgSlot}${textFields}`;
+
+    return `
+      <div class="editor-block" draggable="true" data-block-id="${block.id}">
+        <div class="editor-block-header">
+          <span class="block-drag-handle" aria-label="Drag to reorder">⠿</span>
+          <span class="block-type-label">${typeLabel}</span>
+          ${layoutToggle}
+          <div class="block-actions">
+            <button class="ba-btn" data-dup="${block.id}">Duplicate</button>
+            <button class="ba-btn btn-remove" data-remove="${block.id}">Remove</button>
+          </div>
+        </div>
+        <div class="editor-block-body">
+          ${bodyContent}
+        </div>
+      </div>
+    `;
+  }
+
+  function attachEditorEvents() {
+    // --- Toolbar: add block ---
+    container.querySelectorAll('.tb-btn[data-add]').forEach((btn) => {
+      btn.addEventListener('click', () => addBlock(btn.dataset.add));
+    });
+
+    // --- Layout toggle ---
+    container.querySelectorAll('.lt-btn[data-layout]').forEach((btn) => {
+      btn.addEventListener('click', () => setBlockType(btn.dataset.blockId, btn.dataset.layout));
+    });
+
+    // --- Remove / Duplicate ---
+    container.querySelectorAll('.ba-btn[data-remove]').forEach((btn) => {
+      btn.addEventListener('click', () => removeBlock(btn.dataset.remove));
+    });
+    container.querySelectorAll('.ba-btn[data-dup]').forEach((btn) => {
+      btn.addEventListener('click', () => duplicateBlock(btn.dataset.dup));
+    });
+
+    // --- Image upload ---
+    container.querySelectorAll('[data-upload-slot]').forEach((slot) => {
+      const blockId = slot.dataset.blockId;
+      const fileInput = slot.querySelector(`[data-file-input="${blockId}"]`);
+      slot.addEventListener('click', () => fileInput && fileInput.click());
+      if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const block = workingBlocks.find((b) => b.id === blockId);
+            if (block) {
+              block.img = ev.target.result;
+              redraw();
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    });
+
+    // --- Contenteditable sync ---
+    container.querySelectorAll('[contenteditable][data-field]').forEach((el) => {
+      const field = el.dataset.field;
+      const blockId = el.dataset.blockId;
+      el.addEventListener('input', () => {
+        const block = workingBlocks.find((b) => b.id === blockId);
+        if (block) block[field] = el.innerText;
+      });
+    });
+
+    // --- Drag and Drop ---
+    container.querySelectorAll('.editor-block[draggable]').forEach((card) => {
+      card.addEventListener('dragstart', (e) => {
+        dragSrcId = card.dataset.blockId;
+        setTimeout(() => card.classList.add('dragging'), 0);
+        e.dataTransfer.effectAllowed = 'move';
+        // Safari requires setData for drag to properly initiate.
+        e.dataTransfer.setData('text/plain', dragSrcId);
+      });
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        container.querySelectorAll('.editor-block').forEach((c) => c.classList.remove('drag-over'));
+        dragSrcId = null;
+      });
+      card.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (dragSrcId && dragSrcId !== card.dataset.blockId) {
+          card.classList.add('drag-over');
+        }
+      });
+      card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+      card.addEventListener('drop', (e) => {
+        e.preventDefault();
+        card.classList.remove('drag-over');
+        if (!dragSrcId || dragSrcId === card.dataset.blockId) return;
+        const fromIdx = workingBlocks.findIndex((b) => b.id === dragSrcId);
+        const toIdx = workingBlocks.findIndex((b) => b.id === card.dataset.blockId);
+        if (fromIdx === -1 || toIdx === -1) return;
+        const [moved] = workingBlocks.splice(fromIdx, 1);
+        const insertIdx = fromIdx < toIdx ? toIdx - 1 : toIdx;
+        workingBlocks.splice(insertIdx, 0, moved);
+        redraw();
+      });
+    });
+
+    // --- Save ---
+    const saveBtn = container.querySelector('#editor-save-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        // Flush any active contenteditable that hasn't fired 'input' yet
+        container.querySelectorAll('[contenteditable][data-field]').forEach((el) => {
+          const block = workingBlocks.find((b) => b.id === el.dataset.blockId);
+          if (block) block[el.dataset.field] = el.innerText;
+        });
+
+        // Write back to the in-memory project
+        project.blocks = JSON.parse(JSON.stringify(workingBlocks));
+
+        // Also update in allProjects array
+        const idx = allProjects.findIndex((p) => p.id === project.id);
+        if (idx !== -1) allProjects[idx].blocks = project.blocks;
+
+        // Generate export JSON
+        const exportJson = JSON.stringify(allProjects, null, 2);
+        console.log('[Block Editor] Updated projects.json:', exportJson);
+
+        // Show JSON export overlay
+        showJsonExportOverlay(container, exportJson, project);
+      });
+    }
+
+    // --- Cancel ---
+    const cancelBtn = container.querySelector('#editor-cancel-btn');
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        switchProjectPageToViewMode(project);
+      });
+    }
+  }
+
+  // Initial render
+  renderEditorUI();
+  attachEditorEvents();
+}
+
+function showJsonExportOverlay(container, json, project) {
+  // Remove any existing overlay
+  const existing = container.querySelector('.json-export-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'json-export-overlay';
+  overlay.innerHTML = `
+    <p>✓ Saved! Copy the JSON below and paste it into <code>projects.json</code> to persist your changes:</p>
+    <textarea class="json-export-textarea" readonly></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="btn btn-primary json-copy-btn">Copy JSON</button>
+      <button class="btn btn-outline json-close-overlay-btn">Close</button>
+    </div>
+  `;
+  container.querySelector('.editor-save-bar')?.after(overlay);
+  const jsonTextarea = overlay.querySelector('.json-export-textarea');
+  if (jsonTextarea) {
+    jsonTextarea.value = json;
+  }
+
+  overlay.querySelector('.json-copy-btn').addEventListener('click', () => {
+    navigator.clipboard.writeText(json)
+      .then(() => showToast('JSON copied to clipboard!'))
+      .catch(() => showToast('Copy failed — select the textarea and copy manually'));
+  });
+  overlay.querySelector('.json-close-overlay-btn').addEventListener('click', () => {
+    overlay.remove();
+    switchProjectPageToViewMode(project);
+  });
+
+  overlay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function switchProjectPageToViewMode(project) {
+  const sectionsContainer = document.querySelector('.pp-block-area');
+  if (!sectionsContainer) return;
+  sectionsContainer.innerHTML = renderBlocks(project);
+
+  const editBtn = document.getElementById('pp-edit-btn');
+  if (editBtn) editBtn.textContent = '✏ Edit';
+
+  if (editBtn?._editHandler) {
+    editBtn.removeEventListener('click', editBtn._editHandler);
+  }
+  editBtn._editHandler = () => switchProjectPageToEditMode(project);
+  editBtn?.addEventListener('click', editBtn._editHandler);
+}
+
+function switchProjectPageToEditMode(project) {
+  const sectionsContainer = document.querySelector('.pp-block-area');
+  if (!sectionsContainer) return;
+  renderBlockEditor(project, sectionsContainer);
+
+  const editBtn = document.getElementById('pp-edit-btn');
+  if (editBtn) editBtn.textContent = 'Editing…';
 }
 
 // Wire up hash routing

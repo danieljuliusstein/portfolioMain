@@ -37,6 +37,50 @@
         "heading": "Future Work",
         "content": "The immediate next step is untethered flight, which requires finalizing yaw control and verifying battery endurance at hover throttle. After stable free flight is achieved, I plan to add an RC receiver so the drone can be manually piloted, then layer autonomous features on top of that baseline.\n\nLonger term, I want to add a downward-facing optical flow sensor for position hold without GPS — a harder problem than attitude stabilization because it requires integrating velocity estimates over time. I am also interested in adding a lightweight FPV camera and video transmitter, which introduces new challenges around RF interference with the control electronics.\n\nBeyond the hardware, I plan to open-source the firmware and CAD files so other ECE students can build on this work. The 3D model visible on this page is the actual frame geometry — the same file that gets sliced and printed."
       }
+    ],
+    "blocks": [
+      {
+        "id": "b1",
+        "type": "text-only",
+        "title": "Background & Motivation",
+        "text": "I chose to build a drone from scratch because it sits at the exact intersection of everything that drew me to electrical and computer engineering: real-time embedded software, control theory, power electronics, and mechanical design all have to work together simultaneously, or the thing falls out of the sky. There is no hiding behind a simulation. When I started ECE 1100, I wanted a project that would force me to learn the full hardware-software stack rather than stay comfortable on either side of it. Drones are also a domain where the feedback loop is immediate and physical — you can see exactly what your code is doing, which makes debugging deeply satisfying and occasionally humbling.\n\nThe ESP32 was a deliberate choice over more common flight controller platforms like Betaflight or ArduPilot. Using a general-purpose microcontroller meant I had to implement flight control logic myself rather than configure existing firmware. That constraint was the whole point. I wanted to understand what is actually happening inside a flight controller — how sensor data flows from an IMU into a PID loop and out to motor commands — rather than treat it as a black box. The ESP-FLY project is my answer to the question: can a first-year ECE student build something that actually flies, starting from a blank PCB schematic and a spool of filament?",
+        "img": null
+      },
+      {
+        "id": "b2",
+        "type": "text-only",
+        "title": "Approach & Methods",
+        "text": "The system is built around an ESP32 development board running custom firmware written in C++. The core architecture has three layers: sensor acquisition, state estimation, and motor control. For sensing, I integrated an MPU-6050 IMU over I2C, which provides 3-axis accelerometer and gyroscope readings at up to 1kHz. Raw IMU data is noisy and needs to be fused — I implemented a complementary filter to combine the fast-responding gyroscope with the drift-correcting accelerometer to produce stable roll, pitch, and yaw estimates.\n\nThe frame was designed entirely in CAD and 3D-printed in PLA. The geometry went through 13 major revisions (hence v13 in the filename) to optimize arm rigidity, motor mount angle, and center-of-mass placement. Each print iteration revealed a new tradeoff: stiffer arms reduce vibration but add weight; shorter arms improve agility but reduce stability. The current frame keeps the total weight — including battery and electronics — under 120g, which is the threshold I set for the motors I selected.\n\nMotor control uses four brushless DC motors driven by 10A ESCs communicating over a standard PWM protocol. The flight controller outputs throttle commands to each ESC at 250Hz, fast enough to correct for attitude disturbances before they compound into instability.",
+        "img": null
+      },
+      {
+        "id": "b3",
+        "type": "text-only",
+        "title": "Implementation",
+        "text": "The hardest problem I encountered was vibration. Brushless motors at flight speed create high-frequency vibrations that contaminate the IMU readings and make the gyroscope output look like the drone is tumbling when it is hovering steadily. I solved this in two ways: mechanically, by mounting the flight controller board on small silicone dampers to decouple it from the frame; and in software, by applying a low-pass filter to the gyroscope data before it enters the PID loop.\n\nPID tuning was the other major challenge. A PID controller has three terms — proportional, integral, and derivative — and getting the gains right requires iterative testing. Too much proportional gain and the drone oscillates violently; too little and it drifts. I started with conservative gains and incremented them manually, tethering the drone to a test rig to prevent crashes during tuning. This process taught me more about control systems in two weekends than a semester of reading could have.\n\nOn the software side, the ESP32 runs a main loop that reads the IMU, computes the filter output, runs three independent PID controllers (one per axis), mixes the outputs into per-motor throttle values, and writes to the ESCs — all within a 4ms cycle time to maintain 250Hz update rate. Managing timing and avoiding blocking operations in the loop was a real embedded systems challenge that required careful use of hardware timers.",
+        "img": null
+      },
+      {
+        "id": "b4",
+        "type": "text-only",
+        "title": "Results",
+        "text": "As of the current build, the drone achieves stable hover on a tethered test rig with active PID stabilization on the roll and pitch axes. The complementary filter produces clean attitude estimates with less than 2 degrees of drift over a 30-second hover. The 3D-printed frame (v13) has survived repeated crash-landings during tuning without structural failure, validating the design choices around arm thickness and joint geometry.\n\nThe firmware successfully runs the full sensor-to-motor loop at 250Hz on the ESP32 without missing cycles, demonstrating that a general-purpose microcontroller is capable of meeting real-time flight control timing requirements. The project has produced a fully custom flight controller, a functional CAD model of the frame, and a documented codebase that implements complementary filtering and PID control from scratch.",
+        "img": null
+      },
+      {
+        "id": "b5",
+        "type": "text-only",
+        "title": "Lessons Learned",
+        "text": "This project taught me that embedded systems engineering is fundamentally about managing constraints simultaneously. You cannot optimize for one thing in isolation — every decision about weight, update rate, filtering, or power budget interacts with every other decision. That systems-thinking mindset is the most transferable thing I have taken from this project.\n\nTechnically, I went from having never written interrupt-driven firmware to understanding I2C communication, PWM generation, complementary filters, and real-time scheduling. I also learned CAD iteration discipline: each version of the frame taught me something specific, and documenting what changed and why made each iteration more productive than the last.\n\nProfessionally, I learned that the most useful debugging skill is building observable systems. When I added serial logging to print IMU readings and PID outputs in real time, problems that had been invisible became immediately obvious. Building in observability from the start — not as an afterthought — is something I will carry into every future hardware project.",
+        "img": null
+      },
+      {
+        "id": "b6",
+        "type": "text-only",
+        "title": "Future Work",
+        "text": "The immediate next step is untethered flight, which requires finalizing yaw control and verifying battery endurance at hover throttle. After stable free flight is achieved, I plan to add an RC receiver so the drone can be manually piloted, then layer autonomous features on top of that baseline.\n\nLonger term, I want to add a downward-facing optical flow sensor for position hold without GPS — a harder problem than attitude stabilization because it requires integrating velocity estimates over time. I am also interested in adding a lightweight FPV camera and video transmitter, which introduces new challenges around RF interference with the control electronics.\n\nBeyond the hardware, I plan to open-source the firmware and CAD files so other ECE students can build on this work. The 3D model visible on this page is the actual frame geometry — the same file that gets sliced and printed.",
+        "img": null
+      }
     ]
   },
   {
@@ -76,6 +120,50 @@
       "heading": "Future Work",
       "content": "Several features are natural next steps: expanding the college database, adding a richer financial aid breakdown in the Financial Planner, and incorporating real student review data at scale to improve the accuracy of college experience ratings. On the AI side, a conversational interface that lets students explore matches through dialogue — rather than a form — could make the experience feel even more personalized. I'd also like to add email alerts so students can be notified when deadlines approach for colleges on their shortlist."
     }
+  ],
+  "blocks": [
+    {
+      "id": "b1",
+      "type": "text-only",
+      "title": "Background & Motivation",
+      "text": "The college search process is often reduced to a numbers game — GPA cutoffs, SAT ranges, and acceptance rates. But students spend four years living on a campus, not just attending classes, and the experience fit matters just as much as the academic one. I built EduAlign to shift that framing: instead of filtering by stats alone, the app surfaces colleges that align with who a student is and what they want their college life to feel like. The tagline captures the goal exactly — find colleges that match your experience, not just your stats.",
+      "img": null
+    },
+    {
+      "id": "b2",
+      "type": "text-only",
+      "title": "Approach & Methods",
+      "text": "The matching engine is built around a 3-step intake flow. Step one collects a student's academic profile: GPA, SAT score, intended major, home state, extracurriculars, preferred school size, and in-state tuition preference. Step two presents eight experience sliders — Academic Intensity, Social Life, Inclusivity, Career Support, Collaboration vs Competition, Mental Health Culture, Campus Safety, and Overall Satisfaction — which are auto-tuned based on the student's profile and can be manually adjusted. Step three captures campus vibe through a tag selection UI (options like 'Entrepreneurial', 'Arts & creative', 'Study abroad', 'Diverse community') plus a free-text field for anything else. The AI then scores colleges across all these dimensions and returns the top four matches with a numeric match percentage.",
+      "img": null
+    },
+    {
+      "id": "b3",
+      "type": "text-only",
+      "title": "Implementation",
+      "text": "The frontend is built with React, featuring a multi-step wizard with smooth transitions, slider-based preference controls, and a results page with interactive radar charts that overlay the student's preferences against each college's ratings — making it immediately clear where the fit is strong and where trade-offs exist. The backend is a Python API that handles profile processing, preference auto-tuning logic, and the AI-powered matching and ranking pipeline. The app also includes a College Reviews section (structured pros/cons/advice-for-freshmen format), a Financial Planner, a Compare Colleges tool, and a My Colleges dashboard where students can categorize saves as Dream, Target, or Safety schools and track their full match history.",
+      "img": null
+    },
+    {
+      "id": "b4",
+      "type": "text-only",
+      "title": "Results",
+      "text": "EduAlign produces personalized top-4 college matches with match scores and radar chart visualizations that make preference alignment immediately interpretable. The auto-tune feature — which pre-populates experience sliders based on a student's academic profile and extracurriculars — meaningfully reduces friction while still giving users full control to adjust. The My Colleges dashboard ties the whole experience together, letting students manage their list, financial plans, comparisons, and match history in one place. The app is fully deployed and accessible at edualign-nymh.onrender.com.",
+      "img": null
+    },
+    {
+      "id": "b5",
+      "type": "text-only",
+      "title": "Lessons Learned",
+      "text": "Building EduAlign deepened my understanding of how to turn abstract user preferences into a concrete, explainable ranking system. The auto-tune feature taught me how to design systems that feel intelligent without feeling opaque — sliders start pre-filled but the UI makes clear that they're just a starting point, keeping the user in control. I also learned a lot about UI design for multi-step forms: each step needed to feel purposeful and not overwhelming, which required careful thought about what to ask when and how to communicate what the system is doing with the inputs.",
+      "img": null
+    },
+    {
+      "id": "b6",
+      "type": "text-only",
+      "title": "Future Work",
+      "text": "Several features are natural next steps: expanding the college database, adding a richer financial aid breakdown in the Financial Planner, and incorporating real student review data at scale to improve the accuracy of college experience ratings. On the AI side, a conversational interface that lets students explore matches through dialogue — rather than a form — could make the experience feel even more personalized. I'd also like to add email alerts so students can be notified when deadlines approach for colleges on their shortlist.",
+      "img": null
+    }
   ]
   },
   {
@@ -114,6 +202,50 @@
       {
         "heading": "Future Work",
         "content": "Future improvements could include incorporating time-series data if longitudinal measurements become available, exploring ensemble methods for robustness, and validating the model on external datasets. Integration with a simple web interface for clinician use could make the tool more accessible. There is also room to explore uncertainty quantification to provide confidence intervals around predictions."
+      }
+    ],
+    "blocks": [
+      {
+        "id": "b1",
+        "type": "text-only",
+        "title": "Background & Motivation",
+        "text": "Diabetes is a widespread health condition affecting millions worldwide. Predicting disease progression helps clinicians tailor treatments and improve patient outcomes. This project was motivated by the need for interpretable, data-driven tools that can leverage standard health indicators—such as BMI, blood pressure, and glucose levels—to estimate how a patient's condition may evolve over time. Understanding these patterns is valuable for both healthcare research and practical clinical decision support.",
+        "img": null
+      },
+      {
+        "id": "b2",
+        "type": "text-only",
+        "title": "Approach & Methods",
+        "text": "I used the diabetes dataset from the Efron et al. study, which contains baseline measurements and a quantitative measure of disease progression one year later. The workflow included data preprocessing to handle missing values and outliers, exploratory data analysis to understand feature distributions and correlations, and feature selection to identify the most predictive variables. I implemented several regression techniques including linear regression, ridge regression, and LASSO, comparing them using cross-validation and metrics such as MSE and R-squared.",
+        "img": null
+      },
+      {
+        "id": "b3",
+        "type": "text-only",
+        "title": "Implementation",
+        "text": "The project was implemented in Python using scikit-learn for modeling and pandas for data manipulation. Key challenges included choosing appropriate hyperparameters for regularization and ensuring that the model remained interpretable for domain experts. I used visualization libraries like matplotlib and seaborn to create plots that highlight feature importance and model predictions. The codebase is modular to allow easy experimentation with different algorithms and feature sets.",
+        "img": null
+      },
+      {
+        "id": "b4",
+        "type": "text-only",
+        "title": "Results",
+        "text": "The regression models achieved competitive performance in predicting disease progression. Feature importance analysis revealed that certain baseline measurements—particularly those related to blood serum and body composition—were most predictive. The visualizations helped communicate these findings clearly and demonstrated how different health indicators contribute to the predictions. The project produced a reproducible pipeline that could be extended to larger or different medical datasets.",
+        "img": null
+      },
+      {
+        "id": "b5",
+        "type": "text-only",
+        "title": "Lessons Learned",
+        "text": "This project reinforced the importance of understanding domain context before applying machine learning. I learned to balance model complexity with interpretability, especially in healthcare applications where explainability matters. I also gained experience with the full ML workflow: from raw data to deployed insights. The experience has deepened my interest in applying computational methods to real-world problems with meaningful impact.",
+        "img": null
+      },
+      {
+        "id": "b6",
+        "type": "text-only",
+        "title": "Future Work",
+        "text": "Future improvements could include incorporating time-series data if longitudinal measurements become available, exploring ensemble methods for robustness, and validating the model on external datasets. Integration with a simple web interface for clinician use could make the tool more accessible. There is also room to explore uncertainty quantification to provide confidence intervals around predictions.",
+        "img": null
       }
     ]
   }
