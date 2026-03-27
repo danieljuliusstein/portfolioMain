@@ -7,7 +7,9 @@ const STATIC_ASSETS = [
   '/index.html',
   '/styles.css',
   '/main.js',
+  '/blog.js',
   '/projects.json',
+  '/posts.json',
   '/DJSResume.pdf'
 ];
 

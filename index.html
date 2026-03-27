@@ -14,7 +14,6 @@
   <!-- Preload Critical Resources -->
   <link rel="preload" href="styles.css" as="style">
   <link rel="preload" href="main.js" as="script">
-  <link rel="preload" href="projects.json" as="fetch" crossorigin>
   
   <link rel="stylesheet" href="styles.css">
   <!-- Fallback for no JS -->
@@ -41,6 +40,7 @@
           <a href="#about">About</a>
           <a href="#career-goals">Career Goals</a>
           <a href="#projects">Projects</a>
+          <a href="#blog" class="nav-link">Blog</a>
           <a href="#resume">Resume</a>
           <a href="#contact">Contact</a>
         </nav>
@@ -93,18 +93,44 @@
       </div>
     </section>
 
-    <section id="about" class="about-section">
-      <div class="container">
-        <h2 class="section-title">About Me</h2>
-        <div class="about-content">
-          <div class="about-image">
-            <img src="images/headshot.jpg" alt="Daniel Stein headshot" />
+    <section id="about" class="section">
+      <div class="about-wrapper">
+        <!-- LEFT COLUMN: Photo + identity card -->
+        <div class="about-left">
+          <div class="about-photo-frame">
+            <img
+              src="images/headshot.jpg"
+              alt="Daniel Stein"
+              class="about-photo"
+              loading="lazy"
+            />
+            <div class="about-photo-accent"></div>
           </div>
-          <div class="about-text">
-            <p>I’m a Computer Engineering student at Georgia Tech with a strong interest in software development, especially in areas where software interacts closely with hardware. 
-            <p> My focus is on developing a solid foundation in systems programming, computer architecture, and performance-oriented software. </p>     
-            <p> I’m always looking to deepen my understanding by building and refining projects that push me to think critically and write clean, effective code. </p>    
-            <p> Outside of engineering, I spend a lot of time in the gym, which has helped me build discipline, consistency, and a strong work ethic—qualities I bring into my technical work every day. I’m always looking for ways to grow, improve, and take on new challenges.</p>
+
+          <!-- Stat chips below photo -->
+          <div class="about-chips">
+            <span class="about-chip">📍 Atlanta, GA</span>
+            <span class="about-chip">🎓 Georgia Tech</span>
+            <span class="about-chip">⚙️ Comp. Engineering</span>
+            <span class="about-chip">💪 Always building</span>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Bio text -->
+        <div class="about-right">
+          <!-- Byline header -->
+          <div class="about-byline">
+            <span class="about-label">About</span>
+            <h2 class="about-name">Daniel Stein</h2>
+            <p class="about-role">Computer Engineering · Georgia Tech · Systems & Hardware</p>
+          </div>
+
+          <!-- Bio paragraphs — KEEP EXACT ORIGINAL WORDING -->
+          <div class="about-bio">
+            <p>I'm a Computer Engineering student at Georgia Tech with a strong interest in software development, especially in areas where software interacts closely with hardware.</p>
+            <p>My focus is on developing a solid foundation in systems programming, computer architecture, and performance-oriented software.</p>
+            <p>I'm always looking to deepen my understanding by building and refining projects that push me to think critically and write clean, effective code.</p>
+            <p>Outside of engineering, I spend a lot of time in the gym, which has helped me build discipline, consistency, and a strong work ethic—qualities I bring into my technical work every day. I'm always looking for ways to grow, improve, and take on new challenges.</p>
           </div>
         </div>
       </div>
@@ -264,6 +290,17 @@
         </div>
         
         <p id="no-results" class="no-results" hidden>No projects found.</p>
+      </div>
+    </section>
+
+    <!-- BLOG SECTION -->
+    <section id="blog" class="section">
+      <div class="section-header">
+        <h2 class="section-title">Writing</h2>
+        <p class="section-subtitle">Notes on systems, hardware, and building things.</p>
+      </div>
+      <div class="blog-grid" id="blog-grid">
+        <!-- Populated by blog.js -->
       </div>
     </section>
 
@@ -533,6 +570,8 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="blog.js" defer></script>
+  <script src="about.js" defer></script>
   <script src="main.js" defer></script>
 </body>
 </html>

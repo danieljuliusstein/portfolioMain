@@ -1,0 +1,13 @@
+{
+  "name": "portfolio",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Static portfolio site with local dev server for editor persistence",
+  "scripts": {
+    "dev": "node dev-server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

@@ -2,6 +2,8 @@
 // State Management
 // ======================
 let allProjects = [];
+let allPosts = [];
+let activeProjectsFileName = 'projects.json';
 // ======================
 // Edit Auth (URL Passphrase)
 // ======================
@@ -156,15 +158,27 @@ async function loadProjects() {
     // Show skeleton loading state
     grid.innerHTML = createSkeletonCards(6);
 
-    // Fetch projects
-    const response = await fetch('projects.json');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    // Fetch projects, with fallback for repos using featured-projects.json
+    const projectFiles = ['projects.json', 'featured-projects.json'];
+    let projects = null;
+    let lastStatus = null;
+    for (const file of projectFiles) {
+      const response = await fetch(file);
+      if (!response.ok) {
+        lastStatus = response.status;
+        continue;
+      }
+      const data = await response.json();
+      if (!Array.isArray(data)) {
+        throw new Error(`Invalid projects data in ${file}`);
+      }
+      projects = data.map(normalizeProject);
+      activeProjectsFileName = file;
+      break;
     }
 
-    const projects = await response.json();
-    if (!Array.isArray(projects)) {
-      throw new Error('Invalid projects data');
+    if (!projects) {
+      throw new Error(`HTTP error! status: ${lastStatus || 404}`);
     }
 
     // Store projects and render
@@ -181,6 +195,32 @@ async function loadProjects() {
         </button>
       </div>
     `;
+  }
+}
+
+function normalizeProject(project) {
+  const tags = Array.isArray(project.tags)
+    ? project.tags
+    : (Array.isArray(project.technologies) ? project.technologies : []);
+  return {
+    ...project,
+    tags,
+    thumbnail: project.thumbnail || project.image || '',
+    thumbnailAlt: project.thumbnailAlt || project.imageAlt || 'Project screenshot',
+    longDescription: project.longDescription || project.description || ''
+  };
+}
+
+async function loadPostsData() {
+  try {
+    const response = await fetch('posts.json');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const posts = await response.json();
+    if (!Array.isArray(posts)) throw new Error('Invalid posts data');
+    allPosts = posts;
+  } catch (error) {
+    console.error('Error loading posts:', error);
+    allPosts = [];
   }
 }
 
@@ -874,11 +914,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Register service worker for offline capability
   registerServiceWorker();
 
-  // Load projects then check for deep link
-  loadProjects().then(() => {
+  // Load data then check for deep link
+  Promise.all([loadProjects(), loadPostsData()]).then(() => {
     router();
   }).catch(error => {
-    console.error('Failed to load projects:', error);
+    console.error('Failed to load initial data:', error);
   });
 
   // Add copy email button listener (if it still exists)
@@ -1033,8 +1073,10 @@ function initCanvasDots() {
 // Service Worker Registration
 // ======================
 function registerServiceWorker() {
-  // Only register service worker in production (not file:// protocol)
-  if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+  // Avoid service worker during local development (it can aggressively cache and "undo" edits).
+  const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  // Only register service worker in non-local environments (and not file:// protocol)
+  if ('serviceWorker' in navigator && window.location.protocol !== 'file:' && !isLocalhost) {
     navigator.serviceWorker.register('/service-worker.js')
       .then((registration) => {
         console.log('[Service Worker] Registered successfully:', registration.scope);
@@ -1844,6 +1886,15 @@ function getMainContent() {
 
 function router() {
   const hash = window.location.hash;
+  const blogMatch = hash.match(/^#\/blog\/(.+)$/);
+  if (blogMatch) {
+    const postId = decodeURIComponent(blogMatch[1]);
+    const post = allPosts.find((p) => p.id === postId);
+    if (post) {
+      renderBlogPostPage(post);
+      return;
+    }
+  }
   const match = hash.match(/^#\/project\/(.+)$/);
   if (match) {
     const projectId = decodeURIComponent(match[1]);
@@ -1860,10 +1911,16 @@ function router() {
 function navigateToProject(project) {
   window.location.hash = `/project/${encodeURIComponent(project.id)}`;
 }
+function navigateToBlog(postId) {
+  window.location.hash = `/blog/${encodeURIComponent(postId)}`;
+}
+window.navigateToBlog = navigateToBlog;
 
 function showHomePage() {
   const page = document.getElementById('project-page');
   if (page) page.remove();
+  const blogPage = document.getElementById('blog-page');
+  if (blogPage) blogPage.remove();
   const mc = getMainContent();
   if (mc) mc.style.display = '';
   document.title = 'Portfolio - Daniel Stein';
@@ -2027,7 +2084,11 @@ function renderBlockView(block) {
   }
 }
 
-function renderBlockEditor(project, container) {
+function renderBlockEditor(project, container, options = {}) {
+  const collection = options.collection || allProjects;
+  const exportFileName = options.exportFileName || 'projects.json';
+  const onCloseView = options.onCloseView || (() => switchProjectPageToViewMode(project));
+
   // Work on a deep copy so Cancel can restore original
   const workingBlocks = JSON.parse(JSON.stringify(
     project.blocks && project.blocks.length > 0
@@ -2095,6 +2156,14 @@ function renderBlockEditor(project, container) {
     const isImgType = block.type === 'img-text-left' || block.type === 'img-text-right';
     const isFullImg = block.type === 'full-img';
 
+    const typeQuickActions = `
+      <div class="type-quick-actions" role="group" aria-label="Convert block type">
+        <button class="lt-btn ${block.type === 'text-only' ? 'active' : ''}" data-convert-type="text-only" data-block-id="${block.id}">Text</button>
+        <button class="lt-btn ${(block.type === 'img-text-left' || block.type === 'img-text-right') ? 'active' : ''}" data-convert-type="img-text-left" data-block-id="${block.id}">Image + Text</button>
+        <button class="lt-btn ${block.type === 'full-img' ? 'active' : ''}" data-convert-type="full-img" data-block-id="${block.id}">Full Image</button>
+      </div>
+    `;
+
     const layoutToggle = isImgType ? `
       <div class="layout-toggle">
         <button class="lt-btn ${block.type === 'img-text-left' ? 'active' : ''}" data-layout="img-text-left" data-block-id="${block.id}">Img left</button>
@@ -2132,6 +2201,7 @@ function renderBlockEditor(project, container) {
         <div class="editor-block-header">
           <span class="block-drag-handle" aria-label="Drag to reorder">⠿</span>
           <span class="block-type-label">${typeLabel}</span>
+          ${typeQuickActions}
           ${layoutToggle}
           <div class="block-actions">
             <button class="ba-btn" data-dup="${block.id}">Duplicate</button>
@@ -2154,6 +2224,13 @@ function renderBlockEditor(project, container) {
     // --- Layout toggle ---
     container.querySelectorAll('.lt-btn[data-layout]').forEach((btn) => {
       btn.addEventListener('click', () => setBlockType(btn.dataset.blockId, btn.dataset.layout));
+    });
+
+    // --- Quick convert buttons ---
+    container.querySelectorAll('[data-convert-type][data-block-id]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        setBlockType(btn.dataset.blockId, btn.dataset.convertType);
+      });
     });
 
     // --- Remove / Duplicate ---
@@ -2246,15 +2323,50 @@ function renderBlockEditor(project, container) {
         project.blocks = JSON.parse(JSON.stringify(workingBlocks));
 
         // Also update in allProjects array
-        const idx = allProjects.findIndex((p) => p.id === project.id);
-        if (idx !== -1) allProjects[idx].blocks = project.blocks;
+        const idx = collection.findIndex((p) => p.id === project.id);
+        if (idx !== -1) collection[idx].blocks = project.blocks;
 
         // Generate export JSON
-        const exportJson = JSON.stringify(allProjects, null, 2);
+        const exportJson = JSON.stringify(collection, null, 2);
         console.log('[Block Editor] Updated projects.json:', exportJson);
 
-        // Show JSON export overlay
-        showJsonExportOverlay(container, exportJson, project);
+        const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+        if (isLocalhost) {
+          // Persist automatically in dev by posting to the local dev server.
+          fetch('/__save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file: exportFileName, content: exportJson })
+          })
+            .then(async (r) => {
+              if (!r.ok) {
+                if (r.status === 404 || r.status === 405) {
+                  throw new Error('AUTO_SAVE_UNAVAILABLE');
+                }
+                const data = await r.json().catch(() => ({}));
+                throw new Error(data?.error || `HTTP ${r.status}`);
+              }
+              showToast(`Saved to ${exportFileName}`);
+              onCloseView();
+            })
+            .catch((err) => {
+              console.error('[Block Editor] Dev save failed:', err);
+              const hint = err.message === 'AUTO_SAVE_UNAVAILABLE'
+                ? 'Auto-save is not available on this server. Run the site with `npm run dev` (http://localhost:5174), or copy/paste JSON below:'
+                : `Auto-save failed (${escapeHtml(err.message)}). Copy/paste JSON below as a fallback:`;
+              showJsonExportOverlay(container, exportJson, { project, exportFileName, onCloseView }, {
+                mode: 'error',
+                errorText: hint
+              });
+            });
+        } else {
+          // Production fallback: show copy/paste overlay.
+          showJsonExportOverlay(container, exportJson, {
+            project,
+            exportFileName,
+            onCloseView
+          });
+        }
       });
     }
 
@@ -2262,7 +2374,7 @@ function renderBlockEditor(project, container) {
     const cancelBtn = container.querySelector('#editor-cancel-btn');
     if (cancelBtn) {
       cancelBtn.addEventListener('click', () => {
-        switchProjectPageToViewMode(project);
+        onCloseView();
       });
     }
   }
@@ -2272,15 +2384,20 @@ function renderBlockEditor(project, container) {
   attachEditorEvents();
 }
 
-function showJsonExportOverlay(container, json, project) {
+function showJsonExportOverlay(container, json, options = {}, ui = {}) {
+  const exportFileName = options.exportFileName || 'projects.json';
+  const onCloseView = options.onCloseView || (() => {
+    if (options.project) switchProjectPageToViewMode(options.project);
+  });
   // Remove any existing overlay
   const existing = container.querySelector('.json-export-overlay');
   if (existing) existing.remove();
 
   const overlay = document.createElement('div');
   overlay.className = 'json-export-overlay';
+  const copyLead = ui && ui.errorText ? ui.errorText : `✓ Saved! Copy the JSON below and paste it into <code>${escapeHtml(exportFileName)}</code> to persist your changes:`;
   overlay.innerHTML = `
-    <p>✓ Saved! Copy the JSON below and paste it into <code>projects.json</code> to persist your changes:</p>
+    <p>${copyLead}</p>
     <textarea class="json-export-textarea" readonly></textarea>
     <div style="display:flex;gap:8px;margin-top:8px;">
       <button class="btn btn-primary json-copy-btn">Copy JSON</button>
@@ -2300,7 +2417,7 @@ function showJsonExportOverlay(container, json, project) {
   });
   overlay.querySelector('.json-close-overlay-btn').addEventListener('click', () => {
     overlay.remove();
-    switchProjectPageToViewMode(project);
+    onCloseView();
   });
 
   overlay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -2324,10 +2441,124 @@ function switchProjectPageToViewMode(project) {
 function switchProjectPageToEditMode(project) {
   const sectionsContainer = document.querySelector('.pp-block-area');
   if (!sectionsContainer) return;
-  renderBlockEditor(project, sectionsContainer);
+  renderBlockEditor(project, sectionsContainer, {
+    collection: allProjects,
+    exportFileName: activeProjectsFileName,
+    onCloseView: () => switchProjectPageToViewMode(project)
+  });
 
   const editBtn = document.getElementById('pp-edit-btn');
   if (editBtn) editBtn.textContent = 'Editing…';
+}
+
+function renderBlogPostBlocks(post) {
+  const blocks = post.blocks && post.blocks.length > 0
+    ? post.blocks
+    : [{
+      id: 'pb0',
+      type: 'text-only',
+      title: '',
+      text: post.excerpt || '',
+      img: null
+    }];
+  return `<div class="blocks-container">
+    ${blocks.map((block) => renderBlockView(block)).join('')}
+  </div>`;
+}
+
+function switchBlogPageToViewMode(post) {
+  const sectionsContainer = document.querySelector('.bp-block-area');
+  if (!sectionsContainer) return;
+  sectionsContainer.innerHTML = renderBlogPostBlocks(post);
+
+  const editBtn = document.getElementById('bp-edit-btn');
+  if (editBtn) editBtn.textContent = '✏ Edit';
+
+  if (editBtn?._editHandler) {
+    editBtn.removeEventListener('click', editBtn._editHandler);
+  }
+  editBtn._editHandler = () => switchBlogPageToEditMode(post);
+  editBtn?.addEventListener('click', editBtn._editHandler);
+}
+
+function switchBlogPageToEditMode(post) {
+  const sectionsContainer = document.querySelector('.bp-block-area');
+  if (!sectionsContainer) return;
+  renderBlockEditor(post, sectionsContainer, {
+    collection: allPosts,
+    exportFileName: 'posts.json',
+    onCloseView: () => switchBlogPageToViewMode(post)
+  });
+
+  const editBtn = document.getElementById('bp-edit-btn');
+  if (editBtn) editBtn.textContent = 'Editing…';
+}
+
+function renderBlogPostPage(post) {
+  const mc = getMainContent();
+  if (mc) mc.style.display = 'none';
+
+  const existingProject = document.getElementById('project-page');
+  if (existingProject) existingProject.remove();
+  const existingBlog = document.getElementById('blog-page');
+  if (existingBlog) existingBlog.remove();
+
+  const page = document.createElement('div');
+  page.id = 'blog-page';
+  page.innerHTML = `
+    <div class="pp-back-bar">
+      <div class="container">
+        <button class="pp-back-btn" id="bp-back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" width="16" height="16"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          Back to Blog
+        </button>
+      </div>
+    </div>
+
+    <div class="pp-hero bp-hero">
+      <div class="container">
+        <div class="bp-meta-row">
+          <span class="blog-tag">${escapeHtml(post.category || 'Blog')}</span>
+          <span class="blog-tag blog-tag--secondary">${escapeHtml(post.tag || '')}</span>
+          <span class="bp-date">${escapeHtml(post.date || '')}</span>
+          <span class="bp-read-time">${escapeHtml(post.readTime || '')} read</span>
+        </div>
+        <h1 class="pp-title">${escapeHtml(post.title || 'Untitled Post')}</h1>
+        <p class="pp-description">${escapeHtml(post.excerpt || '')}</p>
+      </div>
+    </div>
+
+    <div class="pp-body">
+      <div class="container pp-sections">
+        <div class="bp-block-area" id="bp-block-area">
+          ${renderBlogPostBlocks(post)}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertBefore(page, document.getElementById('project-modal'));
+
+  checkEditAuth().then((authorized) => {
+    if (!authorized) return;
+    const heroContainer = page.querySelector('.bp-hero .container');
+    if (!heroContainer) return;
+
+    const editBtn = document.createElement('button');
+    editBtn.id = 'bp-edit-btn';
+    editBtn.className = 'btn btn-outline pp-edit-btn';
+    editBtn.textContent = '✏ Edit';
+    editBtn._editHandler = () => switchBlogPageToEditMode(post);
+    editBtn.addEventListener('click', editBtn._editHandler);
+    heroContainer.appendChild(editBtn);
+  });
+
+  document.title = `${post.title} — Blog — Daniel Stein`;
+  window.scrollTo(0, 0);
+
+  document.getElementById('bp-back-btn').addEventListener('click', () => {
+    window.location.hash = '#blog';
+  });
 }
 
 // Wire up hash routing
