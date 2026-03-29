@@ -1,0 +1,42 @@
+[
+  {
+    "id": "esp32-rtos-month-one",
+    "title": "Building an ESP32 RTOS from Scratch: Month One",
+    "category": "Systems",
+    "tag": "Hardware",
+    "date": "2025-03-10",
+    "readTime": "8 min",
+    "excerpt": "What happens when you ignore FreeRTOS entirely and roll your own task scheduler on bare metal. Spoiler: pain, then enlightenment.",
+    "color": "#1a0a2e"
+  },
+  {
+    "id": "digital-logic-tips",
+    "title": "Digital Logic Tips Nobody Teaches in ECE",
+    "category": "ECE Notes",
+    "tag": "Education",
+    "date": "2025-02-22",
+    "readTime": "5 min",
+    "excerpt": "The stuff that clicked for me after three semesters of confusion - Karnaugh maps, metastability, and why your professor glosses over timing.",
+    "color": "#0a1628"
+  },
+  {
+    "id": "create-x-update",
+    "title": "Create-X Update: What We've Built So Far",
+    "category": "Career",
+    "tag": "Startup",
+    "date": "2025-01-15",
+    "readTime": "4 min",
+    "excerpt": "Six weeks into Georgia Tech's Create-X accelerator. Here's what the product looks like, what we got wrong, and what we're shipping next.",
+    "color": "#0f1f0f"
+  },
+  {
+    "id": "threejs-portfolio-deep-dive",
+    "title": "Why I Added Three.js to a Portfolio Site",
+    "category": "Web Dev",
+    "tag": "Creative",
+    "date": "2024-12-01",
+    "readTime": "6 min",
+    "excerpt": "It's probably overkill. Here's why I did it anyway and what I learned about WebGL performance on mobile.",
+    "color": "#1f0a0a"
+  }
+]

@@ -66,8 +66,17 @@
             aria-label="Toggle between light and dark theme"
             aria-pressed="false"
             title="Toggle theme"
+            type="button"
           >
-            <span aria-hidden="true"></span>
+            <span class="theme-toggle-icons" aria-hidden="true">
+              <!-- Sun (light mode) — stroke icons match terminal / header controls -->
+              <svg class="theme-icon theme-icon-sun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+              </svg>
+              <svg class="theme-icon theme-icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+              </svg>
+            </span>
           </button>
         </div>
       </nav>
@@ -142,122 +151,7 @@
         <h2 class="section-title">Career Goals</h2>
         <p class="career-intro">I'm building toward entrepreneurship — gaining technical depth and real-world experience first, then launching my own venture. Here's the roadmap.</p>
 
-        <div class="phase-tabs" role="group" aria-label="Filter timeline by phase">
-          <button type="button" class="phase-tab active" data-filter="all">All phases</button>
-          <button type="button" class="phase-tab" data-filter="done">Completed</button>
-          <button type="button" class="phase-tab" data-filter="now">In progress</button>
-          <button type="button" class="phase-tab" data-filter="future">Future</button>
-        </div>
-
-        <div class="career-timeline">
-          <div class="tl-item" data-phase="done">
-            <div class="tl-dot done" aria-hidden="true"></div>
-            <div class="tl-card">
-              <div class="tl-meta">
-                <span class="tl-badge badge-done">Completed</span>
-                <span class="tl-period">Fall 2024 — Spring 2025</span>
-              </div>
-              <h3>Foundations & First Projects</h3>
-              <p>Entered Georgia Tech's ECE program and began building. Completed ECE 1100 Discovery Studio, developed independent projects, and learned to ship working software from scratch.</p>
-              <ul class="tl-steps">
-                <li>Enrolled in ECE 1100 Discovery Studio</li>
-                <li>Built and deployed full-stack projects independently</li>
-                <li>Launched personal portfolio site</li>
-                <li>Learned Python data science stack: NumPy, Pandas, scikit-learn</li>
-              </ul>
-              <div class="tl-progress-wrap">
-                <div class="tl-progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><div class="tl-progress-fill fill-done" style="width: 100%"></div></div>
-                <span class="tl-pct">100%</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="tl-item" data-phase="now">
-            <div class="tl-dot now" aria-hidden="true"></div>
-            <div class="tl-card">
-              <div class="tl-meta">
-                <span class="tl-badge badge-now">In Progress</span>
-                <span class="tl-period">Now — Spring 2026</span>
-              </div>
-              <h3>Short-term: Build Skills & Explore</h3>
-              <p>Deepening technical fundamentals and exploring entrepreneurship ecosystems. Learning what it takes to build and ship products people want.</p>
-              <ul class="tl-steps">
-                <li>Complete core ECE courses (Digital Systems, Circuit Analysis)</li>
-                <li>Explore Create-X and GT entrepreneurship resources</li>
-                <li>Join a student org — IEEE, RoboJackets, or startup club</li>
-                <li>Build the ESP32 mini drone (Discovery Project)</li>
-                <li>Take intro business or entrepreneurship course if available</li>
-              </ul>
-              <div class="tl-progress-wrap">
-                <div class="tl-progress-bar" role="progressbar" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"><div class="tl-progress-fill fill-now" style="width: 35%"></div></div>
-                <span class="tl-pct">35%</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="tl-item" data-phase="future">
-            <div class="tl-dot future" aria-hidden="true"></div>
-            <div class="tl-card">
-              <div class="tl-meta">
-                <span class="tl-badge badge-future">Planned</span>
-                <span class="tl-period">Years 2–3 · 2026–2027</span>
-              </div>
-              <h3>Medium-term: Startup Experience</h3>
-              <p>Gain hands-on experience at startups or through Create-X. Validate ideas, learn how products get built and shipped, and build a network in the startup world.</p>
-              <ul class="tl-steps">
-                <li>Secure internship at a startup or high-growth company</li>
-                <li>Participate in Create-X or similar accelerator program</li>
-                <li>Launch a side project or MVP with real users</li>
-                <li>Complete upper-division ECE thread courses</li>
-              </ul>
-              <div class="tl-progress-wrap">
-                <div class="tl-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="tl-progress-fill fill-future" style="width: 0%"></div></div>
-                <span class="tl-pct">0%</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="tl-item" data-phase="future">
-            <div class="tl-dot future" aria-hidden="true"></div>
-            <div class="tl-card">
-              <div class="tl-meta">
-                <span class="tl-badge badge-future">Vision</span>
-                <span class="tl-period">Post-graduation · 2028+</span>
-              </div>
-              <h3>Long-term: Founder & Entrepreneur</h3>
-              <p>My goal is to start my own company — building products that solve real problems. I plan to gain industry experience first, then either join a founding team or launch my own venture.</p>
-              <ul class="tl-steps">
-                <li>Work 3–5 years at a startup or scale-up to learn the ropes</li>
-                <li>Identify a problem worth solving through hands-on experience</li>
-                <li>Optionally pursue an MBA or entrepreneurship program part-time</li>
-                <li>Launch my own company or co-found with the right team</li>
-              </ul>
-              <div class="tl-progress-wrap">
-                <div class="tl-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="tl-progress-fill fill-future" style="width: 0%"></div></div>
-                <span class="tl-pct">0%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="goal-summary">
-          <div class="gs-item">
-            <div class="gs-num">4</div>
-            <div class="gs-label">Milestones</div>
-          </div>
-          <div class="gs-item">
-            <div class="gs-num">~4 yr</div>
-            <div class="gs-label">Horizon</div>
-          </div>
-          <div class="gs-item">
-            <div class="gs-num">2028</div>
-            <div class="gs-label">Target graduation</div>
-          </div>
-          <div class="gs-item">
-            <div class="gs-num">Founder</div>
-            <div class="gs-label">End goal</div>
-          </div>
-        </div>
+        <div class="ece-stepper" role="region" aria-label="Academic year roadmap"></div>
       </div>
     </section>
 
@@ -301,6 +195,9 @@
       </div>
       <div class="blog-grid" id="blog-grid">
         <!-- Populated by blog.js -->
+      </div>
+      <div class="blog-cta-wrap">
+        <a href="#/blog" class="btn btn-outline blog-see-all-btn">See all blogs</a>
       </div>
     </section>
 

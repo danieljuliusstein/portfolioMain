@@ -7,7 +7,9 @@
     "date": "2025-03-10",
     "readTime": "8 min",
     "excerpt": "What happens when you ignore FreeRTOS entirely and roll your own task scheduler on bare metal. Spoiler: pain, then enlightenment.",
-    "color": "#1a0a2e"
+    "color": "#1a0a2e",
+    "published": true,
+    "updatedAt": "2025-03-10T00:00:00.000Z"
   },
   {
     "id": "digital-logic-tips",
@@ -17,7 +19,9 @@
     "date": "2025-02-22",
     "readTime": "5 min",
     "excerpt": "The stuff that clicked for me after three semesters of confusion - Karnaugh maps, metastability, and why your professor glosses over timing.",
-    "color": "#0a1628"
+    "color": "#0a1628",
+    "published": true,
+    "updatedAt": "2025-02-22T00:00:00.000Z"
   },
   {
     "id": "create-x-update",
@@ -27,7 +31,9 @@
     "date": "2025-01-15",
     "readTime": "4 min",
     "excerpt": "Six weeks into Georgia Tech's Create-X accelerator. Here's what the product looks like, what we got wrong, and what we're shipping next.",
-    "color": "#0f1f0f"
+    "color": "#0f1f0f",
+    "published": true,
+    "updatedAt": "2025-01-15T00:00:00.000Z"
   },
   {
     "id": "threejs-portfolio-deep-dive",
@@ -37,6 +43,8 @@
     "date": "2024-12-01",
     "readTime": "6 min",
     "excerpt": "It's probably overkill. Here's why I did it anyway and what I learned about WebGL performance on mobile.",
-    "color": "#1f0a0a"
+    "color": "#1f0a0a",
+    "published": true,
+    "updatedAt": "2024-12-01T00:00:00.000Z"
   }
 ]

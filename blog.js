@@ -8,8 +8,13 @@ async function loadBlogPosts() {
   try {
     const res = await fetch('./posts.json');
     const posts = await res.json();
+    const latestPublished = (Array.isArray(posts) ? posts : [])
+      .map(normalizePostForCards)
+      .filter((post) => post.published)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 4);
 
-    grid.innerHTML = posts.map((post, i) => `
+    grid.innerHTML = latestPublished.map((post, i) => `
       <article
         class="blog-card ${i === 0 ? 'blog-card--featured' : ''}"
         style="--card-bg: ${post.color}; animation-delay: ${i * 0.08}s"
@@ -29,6 +34,10 @@ async function loadBlogPosts() {
         </div>
       </article>
     `).join('');
+
+    if (!latestPublished.length) {
+      grid.innerHTML = '<p class="loading-text">No published blog posts yet.</p>';
+    }
 
     // Animate in on scroll
     observeBlogCards();
@@ -79,3 +88,18 @@ function observeBlogCards() {
 }
 
 document.addEventListener('DOMContentLoaded', loadBlogPosts);
+
+function normalizePostForCards(post) {
+  return {
+    ...post,
+    id: String(post.id || ''),
+    title: post.title || 'Untitled Post',
+    category: post.category || 'Blog',
+    tag: post.tag || '',
+    date: post.date || new Date().toISOString().slice(0, 10),
+    readTime: post.readTime || '5 min',
+    excerpt: post.excerpt || '',
+    color: post.color || '#0f172a',
+    published: typeof post.published === 'boolean' ? post.published : true
+  };
+}

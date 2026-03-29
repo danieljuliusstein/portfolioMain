@@ -4,6 +4,7 @@
 let allProjects = [];
 let allPosts = [];
 let activeProjectsFileName = 'projects.json';
+const DEFAULT_POST_COLOR = '#0f172a';
 // ======================
 // Edit Auth (URL Passphrase)
 // ======================
@@ -207,7 +208,8 @@ function normalizeProject(project) {
     tags,
     thumbnail: project.thumbnail || project.image || '',
     thumbnailAlt: project.thumbnailAlt || project.imageAlt || 'Project screenshot',
-    longDescription: project.longDescription || project.description || ''
+    longDescription: project.longDescription || project.description || '',
+    carouselImages: Array.isArray(project.carouselImages) ? project.carouselImages : []
   };
 }
 
@@ -217,11 +219,47 @@ async function loadPostsData() {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const posts = await response.json();
     if (!Array.isArray(posts)) throw new Error('Invalid posts data');
-    allPosts = posts;
+    allPosts = posts.map(normalizePost).sort(sortPostsByDateDesc);
   } catch (error) {
     console.error('Error loading posts:', error);
     allPosts = [];
   }
+}
+
+function normalizePost(post) {
+  const normalized = {
+    ...post,
+    id: String(post.id || `post-${Date.now()}`),
+    title: post.title || 'Untitled Post',
+    category: post.category || 'Blog',
+    tag: post.tag || '',
+    date: post.date || new Date().toISOString().slice(0, 10),
+    readTime: post.readTime || '5 min',
+    excerpt: post.excerpt || '',
+    color: post.color || DEFAULT_POST_COLOR,
+    published: typeof post.published === 'boolean' ? post.published : true,
+    updatedAt: post.updatedAt || '',
+    coverImage: post.coverImage || '',
+    blocks: Array.isArray(post.blocks) ? post.blocks : []
+  };
+
+  if (!normalized.blocks.length && normalized.excerpt) {
+    normalized.blocks = [{
+      id: `pb-${normalized.id}-0`,
+      type: 'paragraph',
+      text: normalized.excerpt
+    }];
+  }
+
+  return normalized;
+}
+
+function sortPostsByDateDesc(a, b) {
+  return new Date(b.date).getTime() - new Date(a.date).getTime();
+}
+
+function getPublishedPosts() {
+  return allPosts.filter((post) => post.published).sort(sortPostsByDateDesc);
 }
 
 function createSkeletonCards(count = 6) {
@@ -429,7 +467,8 @@ function initSTLCanvas(canvas, stlUrl) {
       );
       mesh.rotation.x = -Math.PI / 2;
       pivot.add(mesh);
-      pivot.position.y = 8;
+      // Lower Y = model sits lower in the viewport (tweak for framing)
+      pivot.position.y = 4;
     })
     .catch(error => {
       console.error('STL load error:', error);
@@ -504,8 +543,8 @@ function openModal(project) {
     : `<p class="modal-description">${escapeHtml(project.longDescription)}</p>`;
 
   const visualContent = project.stlUrl && project.stlUrl.trim() !== ''
-    ? `<div class="modal-stl-viewer" style="width:100%; height:400px; background:#0d1117; display:flex; align-items:center; justify-content:center; margin-bottom:1rem;">
-         <canvas class="modal-stl-canvas" style="width:100%; height:100%; display:block;"></canvas>
+    ? `<div class="modal-stl-viewer">
+         <canvas class="modal-stl-canvas"></canvas>
        </div>`
     : project.image
       ? `<img
@@ -616,12 +655,6 @@ function setupModalFocusTrap(modal) {
       }
     }
   });
-}
-
-function handleModalKeydown(e) {
-  if (e.key === 'Escape') {
-    closeModal();
-  }
 }
 
 // ======================
@@ -818,9 +851,18 @@ function escapeHtml(text) {
 // Keyboard Shortcuts
 // ======================
 function handleGlobalKeydown(e) {
+  const target = e.target;
+  const isTypingContext =
+    target &&
+    (
+      ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) ||
+      target.isContentEditable ||
+      Boolean(target.closest?.('[contenteditable="true"]'))
+    );
+
   // Press 'T' to toggle theme
   if (e.key === 't' || e.key === 'T') {
-    if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+    if (!isTypingContext) {
       toggleTheme();
     }
   }
@@ -877,6 +919,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize theme
   initTheme();
+  const themeToggleBtn = document.querySelector('.theme-toggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', toggleTheme);
+  }
 
   // Initialize scroll animations
   initScrollAnimations();
@@ -902,8 +948,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize testimonials carousel
   initTestimonials();
 
-  // Initialize career goals phase tabs
-  initCareerGoalsPhaseTabs();
+  // ECE academic year stepper (career goals)
+  initEceStepper();
 
   // Initialize featured projects - COMMENTED OUT (uncomment when you have more projects)
   // loadFeaturedProjects();
@@ -1123,6 +1169,349 @@ function initScrollAnimations() {
     section.classList.add('animate-on-scroll');
     observer.observe(section);
   });
+}
+
+// ======================
+// ECE Career Stepper
+// ======================
+/** Fixed connector styles between the four roadmap phases (see ECE_STEPPER_DATA order). */
+const ECE_STEPPER_CONNECTOR_CLASSES = ['conn-done', 'conn-active', 'conn-future'];
+
+function eceStepperDotClasses(status) {
+  if (status === 'completed') return ['sdot-done'];
+  if (status === 'now') return ['sdot-now'];
+  return ['sdot-future'];
+}
+
+function eceStepperBadgeClass(status) {
+  if (status === 'completed') return 'sbadge-done';
+  if (status === 'now') return 'sbadge-now';
+  return 'sbadge-future';
+}
+
+const ECE_STEPPER_DATA = [
+  {
+    label: 'Foundations',
+    badgeText: 'COMPLETED',
+    status: 'completed',
+    range: 'Fall 2025–Spring 2026',
+    dotRange: "Fall '25–Su '26",
+    mode: 'academic',
+    semesters: [
+      {
+        title: 'Fall 2025',
+        courses: [
+          { code: 'APPH 1050', name: 'Sci of Phys Act & Health', tag: 'other' },
+          { code: 'PHYS 2212', name: 'Principles of Physics II', tag: 'gen' },
+          { code: 'ECE 2020', name: 'Digital System Design', tag: 'core' },
+        ],
+      },
+      {
+        title: 'Spring 2026',
+        courses: [
+          { code: 'ECE 2035', name: 'Programming HW/SW Systems', tag: 'core' },
+          { code: 'MATH 1554', name: 'Linear Algebra', tag: 'gen' },
+          { code: 'ECE 1100', name: 'ECE Discovery Studio', tag: 'core' },
+          { code: 'CS 2050', name: 'Intro Discrete Math CS', tag: 'core' },
+        ],
+      },
+      {
+        title: 'Summer 2026',
+        courses: [{ code: 'HUM 3630', name: 'History of Jazz', tag: 'other' }],
+      },
+    ],
+  },
+  {
+    label: 'Build & Study',
+    badgeText: 'NOW',
+    status: 'now',
+    range: 'Fall 2026–Summer 2028',
+    dotRange: "Fall '26–Su '28",
+    mode: 'academic',
+    semesters: [
+      {
+        title: 'Fall 2026',
+        courses: [
+          { code: 'CS 1332', name: 'Data Structures & Algorithms', tag: 'core' },
+          { code: 'ECE 2031', name: 'Digital Design Lab', tag: 'core' },
+          { code: 'MATH 2550', name: 'Multivariable Calc', tag: 'gen' },
+          { code: 'ECE 4150', name: 'Cloud Computing', tag: 'thread' },
+          { code: 'ISYE 3770', name: 'Probability & Statistics', tag: 'gen' },
+        ],
+      },
+      {
+        title: 'Spring 2027',
+        courses: [
+          { code: 'CS 3510', name: 'Design & Analysis of Algorithms', tag: 'thread' },
+          { code: 'ECE 3058', name: 'Arch, Systems, Concurrency', tag: 'core' },
+          { code: 'MATH 2552', name: 'Differential Equations', tag: 'gen' },
+          { code: 'CS 2340', name: 'Objects and Design', tag: 'core' },
+        ],
+      },
+      {
+        title: 'Summer 2027',
+        courses: [
+          { code: 'CS 4605', name: 'Mobile & Ubiquitous Computing', tag: 'thread' },
+          { code: 'CS 3251', name: 'Computer Networking', tag: 'thread' },
+          { code: 'ECE 3005', name: 'ECE Prof/Tech Comm', tag: 'core' },
+          { code: 'ECE 2040', name: 'Circuit Analysis', tag: 'core' },
+        ],
+      },
+      {
+        title: 'Fall 2027',
+        courses: [
+          { code: 'ECE 4180', name: 'Embedded Systems Design', tag: 'thread' },
+          { code: 'CS 3651', name: 'Prototyping Intelligent Devices', tag: 'thread' },
+          { code: 'ECE 4013', name: 'ECE Culminating Design I', tag: 'other' },
+        ],
+      },
+      {
+        title: 'Spring 2028',
+        courses: [
+          { code: 'CS 4220', name: 'Embedded Systems', tag: 'thread' },
+          { code: 'CS 4261', name: 'Mobile Apps & Services', tag: 'thread' },
+          { code: 'ECE 4014', name: 'ECE Culminating Design II', tag: 'other' },
+        ],
+      },
+      {
+        title: 'Summer 2028',
+        courses: [
+          { code: 'Internship', name: 'Software/Hardware Engineering Intern', tag: 'milestone' },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'Industry & Startup',
+    badgeText: 'FUTURE',
+    status: 'future',
+    range: '2028–2033',
+    dotRange: '2028–2033',
+    mode: 'milestone',
+    columns: [
+      {
+        header: 'YEAR 1–2',
+        main: 'Full-time SWE role',
+        description: 'Learn how real products are built and shipped',
+      },
+      {
+        header: 'SIDE PROJECT',
+        main: 'Build and iterate on startup idea',
+        description: 'Validate problem, find co-founder, get first users',
+      },
+      {
+        header: 'YEAR 3–5',
+        main: 'Continue industry role',
+        description: 'Save runway, build network, refine product-market fit',
+      },
+      {
+        header: 'ACCELERATOR',
+        main: 'Apply to accelerator or incubator program',
+        description: 'Get funding, mentorship, and accountability',
+      },
+    ],
+  },
+  {
+    label: 'Founder',
+    badgeText: 'FUTURE',
+    status: 'future',
+    range: '2033+',
+    dotRange: '2033+',
+    mode: 'milestone',
+    columns: [
+      {
+        header: 'LAUNCH',
+        main: 'Start own company full-time',
+        description: 'Leave job, go all-in on venture',
+      },
+      {
+        header: 'BUILD',
+        main: 'Hire first team members',
+        description: 'Delegate, scale, focus on product and customers',
+      },
+      {
+        header: 'SCALE',
+        main: 'Raise seed or Series A if needed',
+        description: 'Grow beyond MVP to real business',
+      },
+      {
+        header: 'VISION',
+        main: 'Build a company worth keeping or selling',
+        description: 'Long-term vision — solve a real problem at scale',
+      },
+    ],
+  },
+];
+
+function initEceStepper() {
+  const root = document.querySelector('.ece-stepper');
+  if (!root || !ECE_STEPPER_DATA.length) return;
+
+  const track = document.createElement('div');
+  track.className = 'stepper-track';
+  track.setAttribute('role', 'tablist');
+  track.setAttribute('aria-label', 'Career roadmap phases');
+
+  const panel = document.createElement('div');
+  panel.className = 'stepper-panel';
+
+  ECE_STEPPER_DATA.forEach((year, index) => {
+    const node = document.createElement('div');
+    node.className = 'stepper-node';
+
+    const badge = document.createElement('span');
+    badge.className = `stepper-badge ${eceStepperBadgeClass(year.status)}`;
+    badge.textContent = year.badgeText;
+
+    const dot = document.createElement('button');
+    dot.type = 'button';
+    dot.className = 'stepper-dot';
+    eceStepperDotClasses(year.status).forEach((c) => dot.classList.add(c));
+    dot.dataset.yearIndex = String(index);
+    dot.setAttribute('role', 'tab');
+    dot.setAttribute('aria-label', `${year.label}, ${year.badgeText}`);
+    dot.setAttribute('aria-pressed', 'false');
+    dot.setAttribute('id', `ece-stepper-dot-${index}`);
+
+    const label = document.createElement('div');
+    label.className = 'stepper-label';
+    const slYear = document.createElement('div');
+    slYear.className = 'sl-year';
+    slYear.textContent = year.label;
+    const slDate = document.createElement('div');
+    slDate.className = 'sl-date';
+    slDate.textContent = year.dotRange ?? year.range;
+    label.append(slYear, slDate);
+
+    node.append(badge, dot, label);
+    track.appendChild(node);
+
+    if (index < ECE_STEPPER_DATA.length - 1) {
+      const conn = document.createElement('div');
+      conn.className = `stepper-connector ${ECE_STEPPER_CONNECTOR_CLASSES[index]}`;
+      conn.setAttribute('aria-hidden', 'true');
+      track.appendChild(conn);
+    }
+  });
+
+  root.append(track, panel);
+
+  let selectedIndex = 0;
+
+  function renderPanel(index) {
+    const y = ECE_STEPPER_DATA[index];
+    panel.innerHTML = '';
+
+    const header = document.createElement('div');
+    header.className = 'stepper-panel-header';
+    const titleEl = document.createElement('div');
+    titleEl.className = 'stepper-panel-year';
+    titleEl.textContent = y.label;
+    const periodEl = document.createElement('div');
+    periodEl.className = 'stepper-panel-period';
+    periodEl.textContent = y.range;
+    header.append(titleEl, periodEl);
+
+    const sems = document.createElement('div');
+    sems.className = 'stepper-sems';
+    sems.setAttribute('role', 'tabpanel');
+    sems.setAttribute('aria-labelledby', `ece-stepper-dot-${index}`);
+    sems.id = 'ece-stepper-panel-content';
+
+    if (y.mode === 'milestone') {
+      y.columns.forEach((col) => {
+        const colEl = document.createElement('div');
+        colEl.className = 'stepper-sem';
+        const st = document.createElement('div');
+        st.className = 'stepper-sem-title';
+        st.textContent = col.header;
+        colEl.appendChild(st);
+        const row = document.createElement('div');
+        row.className = 'stepper-course';
+        if (col.main != null && String(col.main).trim() !== '') {
+          const main = document.createElement('span');
+          main.className = 'sc-code';
+          main.textContent = col.main;
+          row.appendChild(main);
+        }
+        const desc = document.createElement('span');
+        desc.className = 'sc-name';
+        desc.textContent = col.description;
+        const tag = document.createElement('span');
+        tag.className = 'sc-tag sct-milestone';
+        tag.textContent = 'milestone';
+        row.append(desc, tag);
+        colEl.appendChild(row);
+        sems.appendChild(colEl);
+      });
+    } else {
+      y.semesters.forEach((sem) => {
+        const col = document.createElement('div');
+        col.className = 'stepper-sem';
+        const st = document.createElement('div');
+        st.className = 'stepper-sem-title';
+        st.textContent = sem.title;
+        col.appendChild(st);
+
+        if (!sem.courses.length) {
+          const empty = document.createElement('p');
+          empty.className = 'stepper-empty';
+          empty.textContent = 'No courses planned';
+          col.appendChild(empty);
+        } else {
+          sem.courses.forEach((c) => {
+            const row = document.createElement('div');
+            row.className = 'stepper-course';
+            if (c.code != null && String(c.code).trim() !== '') {
+              const code = document.createElement('span');
+              code.className = 'sc-code';
+              code.textContent = c.code;
+              row.appendChild(code);
+            }
+            const name = document.createElement('span');
+            name.className = 'sc-name';
+            name.textContent = c.name;
+            const tag = document.createElement('span');
+            tag.className =
+              c.tag === 'milestone' ? 'sc-tag sct-milestone' : `sc-tag sct-${c.tag}`;
+            tag.textContent = c.tag === 'milestone' ? 'milestone' : c.tag;
+            row.append(name, tag);
+            col.appendChild(row);
+          });
+        }
+
+        sems.appendChild(col);
+      });
+    }
+
+    const panelInner = document.createElement('div');
+    panelInner.className = 'stepper-panel-inner';
+    panelInner.append(header, sems);
+    panel.appendChild(panelInner);
+  }
+
+  function setSelected(index) {
+    selectedIndex = index;
+    const dots = track.querySelectorAll('.stepper-dot');
+    dots.forEach((btn, i) => {
+      const isSel = i === index;
+      btn.classList.toggle('sdot-selected', isSel);
+      btn.setAttribute('aria-pressed', isSel ? 'true' : 'false');
+      btn.setAttribute('aria-selected', isSel ? 'true' : 'false');
+    });
+    renderPanel(index);
+  }
+
+  track.querySelectorAll('.stepper-dot').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const idx = parseInt(btn.dataset.yearIndex, 10);
+      if (Number.isNaN(idx)) return;
+      setSelected(idx);
+    });
+  });
+
+  setSelected(1);
 }
 
 // ======================
@@ -1886,6 +2275,10 @@ function getMainContent() {
 
 function router() {
   const hash = window.location.hash;
+  if (hash === '#/blog') {
+    renderBlogIndexPage();
+    return;
+  }
   const blogMatch = hash.match(/^#\/blog\/(.+)$/);
   if (blogMatch) {
     const postId = decodeURIComponent(blogMatch[1]);
@@ -1904,6 +2297,13 @@ function router() {
       return;
     }
   }
+  // Section route (e.g. #projects, #blog, #contact)
+  const sectionMatch = hash.match(/^#(?!\/)(.+)$/);
+  if (sectionMatch) {
+    showHomePage(sectionMatch[1]);
+    return;
+  }
+
   // Default — show normal homepage
   showHomePage();
 }
@@ -1916,15 +2316,105 @@ function navigateToBlog(postId) {
 }
 window.navigateToBlog = navigateToBlog;
 
-function showHomePage() {
+function showHomePage(scrollTargetId = '') {
   const page = document.getElementById('project-page');
   if (page) page.remove();
   const blogPage = document.getElementById('blog-page');
   if (blogPage) blogPage.remove();
+  const blogIndexPage = document.getElementById('blog-index-page');
+  if (blogIndexPage) blogIndexPage.remove();
   const mc = getMainContent();
   if (mc) mc.style.display = '';
   document.title = 'Portfolio - Daniel Stein';
+  if (!scrollTargetId) {
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Scroll after the home content is visible again.
+  requestAnimationFrame(() => {
+    const target = document.getElementById(scrollTargetId);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  });
+}
+
+function renderBlogIndexPage() {
+  const mc = getMainContent();
+  if (mc) mc.style.display = 'none';
+
+  const existingProject = document.getElementById('project-page');
+  if (existingProject) existingProject.remove();
+  const existingBlogPost = document.getElementById('blog-page');
+  if (existingBlogPost) existingBlogPost.remove();
+  const existingBlogIndex = document.getElementById('blog-index-page');
+  if (existingBlogIndex) existingBlogIndex.remove();
+
+  const publishedPosts = getPublishedPosts();
+  const cards = publishedPosts.map((post) => `
+    <article class="blog-card blog-card--visible" style="--card-bg: ${escapeHtml(post.color)}" data-id="${escapeHtml(post.id)}">
+      <div class="blog-card__inner">
+        <div class="blog-card__meta">
+          <span class="blog-tag">${escapeHtml(post.category)}</span>
+          <span class="blog-tag blog-tag--secondary">${escapeHtml(post.tag)}</span>
+        </div>
+        <h3 class="blog-card__title">${escapeHtml(post.title)}</h3>
+        <p class="blog-card__excerpt">${escapeHtml(post.excerpt || '')}</p>
+        <div class="blog-card__footer">
+          <time class="blog-date">${escapeHtml(post.date)}</time>
+          <span class="blog-read-time">${escapeHtml(post.readTime)} read</span>
+        </div>
+      </div>
+    </article>
+  `).join('');
+
+  const page = document.createElement('div');
+  page.id = 'blog-index-page';
+  page.innerHTML = `
+    <div class="pp-back-bar">
+      <div class="container">
+        <button class="pp-back-btn" id="bi-back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" width="16" height="16"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          Back to Home
+        </button>
+      </div>
+    </div>
+    <section class="section blog-index-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">All Blogs</h2>
+          <p class="section-subtitle">Latest published writing, sorted by date.</p>
+        </div>
+        <div class="blog-grid blog-grid--index" id="blog-index-grid">
+          ${cards || '<p class="loading-text">No published blog posts yet.</p>'}
+        </div>
+      </div>
+    </section>
+  `;
+
+  document.body.insertBefore(page, document.getElementById('project-modal'));
+  document.title = 'All Blogs — Daniel Stein';
   window.scrollTo(0, 0);
+
+  page.querySelector('#bi-back-btn')?.addEventListener('click', () => {
+    window.location.hash = '#blog';
+  });
+  page.querySelectorAll('.blog-card[data-id]').forEach((card) => {
+    card.addEventListener('click', () => {
+      window.location.hash = `/blog/${encodeURIComponent(card.dataset.id)}`;
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        card.click();
+      }
+    });
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+  });
 }
 
 function renderProjectPage(project) {
@@ -1945,7 +2435,7 @@ function renderProjectPage(project) {
       ? `<img src="${project.image}" alt="${escapeHtml(project.imageAlt || project.title)}" class="pp-hero-image">`
       : '';
 
-  const sectionsHtml = renderBlocks(project);
+  const sectionsHtml = renderBlocks(project) + renderProjectCarousel(project);
 
   const tags = (project.tags || []).map(t =>
     `<span class="project-tag">${escapeHtml(t)}</span>`
@@ -2022,7 +2512,7 @@ function renderProjectPage(project) {
 
   // Back button
   document.getElementById('pp-back-btn').addEventListener('click', () => {
-    history.back();
+    window.location.hash = '#projects';
   });
 
   // Init STL if needed
@@ -2034,11 +2524,121 @@ function renderProjectPage(project) {
       });
     });
   }
+
+  requestAnimationFrame(() => initProjectCarousel(page));
 }
 
 // ======================
 // Block Editor
 // ======================
+function renderProjectCarousel(project) {
+  const slides = project.carouselImages;
+  if (!Array.isArray(slides) || slides.length === 0) return '';
+
+  const dots = slides
+    .map(
+      (_, i) =>
+        `<button type="button" class="pp-carousel-dot ${i === 0 ? 'active' : ''}" data-carousel-go="${i}" aria-label="Go to slide ${i + 1}" aria-current="${i === 0 ? 'true' : 'false'}"></button>`
+    )
+    .join('');
+
+  const slideHtml = slides
+    .map(
+      (slide, i) => `
+    <div class="pp-carousel-slide" data-carousel-slide="${i}" aria-hidden="${i === 0 ? 'false' : 'true'}">
+      <figure class="pp-carousel-figure">
+        <div class="pp-carousel-img-wrap">
+          <img src="${slide.src}" alt="${escapeHtml(slide.alt || 'Gallery image')}" class="pp-carousel-img" loading="lazy" decoding="async">
+        </div>
+        ${slide.caption ? `<figcaption class="pp-carousel-caption">${escapeHtml(slide.caption)}</figcaption>` : ''}
+      </figure>
+    </div>`
+    )
+    .join('');
+
+  const isSingle = slides.length <= 1;
+  const carouselMod = isSingle ? ' pp-carousel--single' : '';
+
+  return `
+    <section class="pp-carousel-section" aria-label="Image gallery">
+      <div class="pp-carousel-section-head">
+        <h2 class="pp-carousel-heading">Gallery</h2>
+        ${!isSingle ? `<p class="pp-carousel-sub">${slides.length} images — use arrows or dots to browse</p>` : ''}
+      </div>
+      <div class="pp-carousel${carouselMod}" data-pp-carousel tabindex="0" role="region" aria-roledescription="carousel">
+        <div class="pp-carousel-row">
+          <button type="button" class="pp-carousel-nav pp-carousel-prev" aria-label="Previous image">
+            <span class="pp-carousel-nav-icon" aria-hidden="true">‹</span>
+          </button>
+          <div class="pp-carousel-viewport">
+            <div class="pp-carousel-track" data-carousel-track>
+              ${slideHtml}
+            </div>
+          </div>
+          <button type="button" class="pp-carousel-nav pp-carousel-next" aria-label="Next image">
+            <span class="pp-carousel-nav-icon" aria-hidden="true">›</span>
+          </button>
+        </div>
+        <div class="pp-carousel-dots-wrap">
+          <div class="pp-carousel-dots" role="tablist" aria-label="Slide markers">${dots}</div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function initProjectCarousel(root) {
+  if (!root) return;
+  const el = root.querySelector('[data-pp-carousel]');
+  if (!el) return;
+
+  const track = el.querySelector('[data-carousel-track]');
+  const slides = el.querySelectorAll('[data-carousel-slide]');
+  const prevBtn = el.querySelector('.pp-carousel-prev');
+  const nextBtn = el.querySelector('.pp-carousel-next');
+  const dots = el.querySelectorAll('[data-carousel-go]');
+  const total = slides.length;
+  if (!track || total === 0) return;
+
+  let currentIndex = 0;
+
+  function update() {
+    track.style.transform = `translateX(-${currentIndex * 100}%)`;
+    slides.forEach((s, i) => {
+      s.setAttribute('aria-hidden', i !== currentIndex ? 'true' : 'false');
+    });
+    dots.forEach((d, i) => {
+      d.classList.toggle('active', i === currentIndex);
+      d.setAttribute('aria-current', i === currentIndex ? 'true' : 'false');
+    });
+    if (prevBtn) prevBtn.disabled = currentIndex === 0;
+    if (nextBtn) nextBtn.disabled = currentIndex === total - 1;
+  }
+
+  function goTo(i) {
+    currentIndex = Math.max(0, Math.min(i, total - 1));
+    update();
+  }
+
+  prevBtn?.addEventListener('click', () => goTo(currentIndex - 1));
+  nextBtn?.addEventListener('click', () => goTo(currentIndex + 1));
+  dots.forEach((dot) => {
+    dot.addEventListener('click', () => goTo(parseInt(dot.dataset.carouselGo, 10)));
+  });
+
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      goTo(currentIndex - 1);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      goTo(currentIndex + 1);
+    }
+  });
+
+  update();
+}
+
 function renderBlocks(project) {
   const blocks = project.blocks && project.blocks.length > 0
     ? project.blocks
@@ -2060,27 +2660,52 @@ function renderBlockView(block) {
     ? `<img src="${block.img}" alt="${escapeHtml(block.title || 'Block image')}" style="width:100%;border-radius:var(--border-radius);display:block;">`
     : `<div class="block-img-placeholder">No image</div>`;
 
-  const textHtml = `
-    ${block.title ? `<h3 class="block-view-title">${escapeHtml(block.title)}</h3>` : ''}
-    <p class="block-view-text">${escapeHtml(block.text || '')}</p>
-  `;
-
   switch (block.type) {
+    case 'heading':
+      return `<h3 class="block-view-heading">${escapeHtml(block.text || block.title || '')}</h3>`;
+    case 'paragraph':
+      return `<p class="block-view-text">${escapeHtml(block.text || '')}</p>`;
+    case 'quote':
+      return `<blockquote class="block-view-quote">${escapeHtml(block.text || '')}</blockquote>`;
+    case 'list': {
+      const items = Array.isArray(block.items)
+        ? block.items
+        : String(block.text || '').split('\n').map((s) => s.trim()).filter(Boolean);
+      const listItems = items.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+      return `<ul class="block-view-list">${listItems}</ul>`;
+    }
+    case 'image':
+      return `<figure class="block-view-figure">
+        ${imgHtml}
+        ${block.caption ? `<figcaption class="block-view-caption">${escapeHtml(block.caption)}</figcaption>` : ''}
+      </figure>`;
     case 'img-text-left':
+    case 'img-text':
+    case 'img-text-right': {
+      const textHtml = `
+        ${block.title ? `<h3 class="block-view-title">${escapeHtml(block.title)}</h3>` : ''}
+        <p class="block-view-text">${escapeHtml(block.text || '')}</p>
+      `;
+      const blockType = block.type === 'img-text' ? 'img-text-left' : block.type;
+      if (blockType === 'img-text-right') {
+        return `<div class="block-layout img-right">
+        <div class="block-img"><img src="${block.img || ''}" alt="${escapeHtml(block.alt || block.title || 'Block image')}" class="block-view-img"></div>
+        <div class="block-text">${textHtml}</div>
+      </div>`;
+      }
       return `<div class="block-layout img-left">
-        <div class="block-img">${imgHtml}</div>
+        <div class="block-img"><img src="${block.img || ''}" alt="${escapeHtml(block.alt || block.title || 'Block image')}" class="block-view-img"></div>
         <div class="block-text">${textHtml}</div>
       </div>`;
-    case 'img-text-right':
-      return `<div class="block-layout img-right">
-        <div class="block-img">${imgHtml}</div>
-        <div class="block-text">${textHtml}</div>
-      </div>`;
+    }
     case 'full-img':
-      return `<div class="block-full-img">${imgHtml}</div>`;
+      return `<div class="block-full-img"><img src="${block.img || ''}" alt="${escapeHtml(block.alt || block.title || 'Block image')}" class="block-view-img"></div>`;
     case 'text-only':
     default:
-      return `<div class="block-text-only">${textHtml}</div>`;
+      return `<div class="block-text-only">
+        ${block.title ? `<h3 class="block-view-title">${escapeHtml(block.title)}</h3>` : ''}
+        <p class="block-view-text">${escapeHtml(block.text || '')}</p>
+      </div>`;
   }
 }
 
@@ -2088,20 +2713,60 @@ function renderBlockEditor(project, container, options = {}) {
   const collection = options.collection || allProjects;
   const exportFileName = options.exportFileName || 'projects.json';
   const onCloseView = options.onCloseView || (() => switchProjectPageToViewMode(project));
+  const isBlogEditor = options.editorMode === 'blog';
 
   // Work on a deep copy so Cancel can restore original
+  const defaultBlock = isBlogEditor
+    ? { id: 'b0', type: 'paragraph', text: project.excerpt || '', img: null }
+    : { id: 'b0', type: 'text-only', title: '', text: project.description || '', img: null };
   const workingBlocks = JSON.parse(JSON.stringify(
     project.blocks && project.blocks.length > 0
       ? project.blocks
-      : [{ id: 'b0', type: 'text-only', title: '', text: project.description || '', img: null }]
+      : [defaultBlock]
   ));
+
+  function generateCarouselId() {
+    return `car${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
+  }
+
+  const workingCarousel = !isBlogEditor
+    ? (Array.isArray(project.carouselImages) ? project.carouselImages : []).map((s) => ({
+      id: generateCarouselId(),
+      src: s.src || '',
+      alt: s.alt || '',
+      caption: s.caption || ''
+    }))
+    : [];
+
+  const postMeta = isBlogEditor
+    ? {
+      title: project.title || '',
+      category: project.category || 'Blog',
+      tag: project.tag || '',
+      date: project.date || new Date().toISOString().slice(0, 10),
+      readTime: project.readTime || '5 min',
+      excerpt: project.excerpt || '',
+      color: project.color || DEFAULT_POST_COLOR,
+      published: typeof project.published === 'boolean' ? project.published : false
+    }
+    : null;
 
   function generateId() {
     return 'b' + Date.now() + Math.random().toString(36).slice(2, 6);
   }
 
   function addBlock(type) {
-    workingBlocks.push({ id: generateId(), type, title: '', text: '', img: null });
+    const blockDefaults = {
+      heading: { id: generateId(), type: 'heading', text: 'New heading' },
+      paragraph: { id: generateId(), type: 'paragraph', text: '' },
+      quote: { id: generateId(), type: 'quote', text: '' },
+      list: { id: generateId(), type: 'list', items: [''] },
+      image: { id: generateId(), type: 'image', img: null, caption: '', alt: '' },
+      'img-text-left': { id: generateId(), type: 'img-text-left', title: '', text: '', img: null, alt: '' },
+      'text-only': { id: generateId(), type: 'text-only', title: '', text: '', img: null },
+      'full-img': { id: generateId(), type: 'full-img', img: null, alt: '' }
+    };
+    workingBlocks.push(blockDefaults[type] || { id: generateId(), type: 'paragraph', text: '' });
     redraw();
   }
 
@@ -2131,20 +2796,94 @@ function renderBlockEditor(project, container, options = {}) {
     attachEditorEvents();
   }
 
+  function renderCarouselEditorHtml() {
+    if (isBlogEditor) return '';
+    const rows = workingCarousel
+      .map(
+        (slide, idx) => `
+      <div class="carousel-editor-row" data-carousel-row="${slide.id}">
+        <div class="carousel-editor-thumb-wrap">
+          ${slide.src
+            ? `<img src="${slide.src}" alt="" class="carousel-editor-thumb">`
+            : '<div class="carousel-editor-thumb-empty">No image</div>'}
+        </div>
+        <div class="carousel-editor-fields">
+          <label class="carousel-editor-label"><span class="carousel-editor-label-text">Alt text</span>
+            <input type="text" class="blog-meta-input carousel-editor-input" data-carousel-field="alt" data-carousel-id="${slide.id}" value="${escapeHtml(slide.alt)}" placeholder="Describe the image for screen readers">
+          </label>
+          <label class="carousel-editor-label"><span class="carousel-editor-label-text">Caption</span>
+            <input type="text" class="blog-meta-input carousel-editor-input" data-carousel-field="caption" data-carousel-id="${slide.id}" value="${escapeHtml(slide.caption)}" placeholder="Optional caption under the image">
+          </label>
+        </div>
+        <div class="carousel-editor-actions">
+          <button type="button" class="ba-btn" data-carousel-up="${slide.id}" ${idx === 0 ? 'disabled' : ''} title="Move up">↑</button>
+          <button type="button" class="ba-btn" data-carousel-down="${slide.id}" ${idx === workingCarousel.length - 1 ? 'disabled' : ''} title="Move down">↓</button>
+          <button type="button" class="ba-btn btn-remove" data-carousel-remove="${slide.id}">Remove</button>
+        </div>
+      </div>`
+      )
+      .join('');
+
+    return `
+      <div class="pp-carousel-editor">
+        <h3 class="pp-carousel-editor-title">Image carousel</h3>
+        <p class="pp-carousel-editor-hint">Images appear in a gallery carousel at the bottom of this project page (after your blocks).</p>
+        <div class="carousel-editor-list" id="carousel-editor-list">
+          ${rows || '<p class="carousel-editor-empty">No slides yet. Add an image below.</p>'}
+        </div>
+        <div class="carousel-editor-toolbar">
+          <button type="button" class="tb-btn" id="carousel-add-slide-btn">+ Add image</button>
+          <input type="file" id="carousel-file-input" accept="image/*" multiple style="display:none" aria-hidden="true">
+        </div>
+      </div>
+    `;
+  }
+
   // ---- Drag state ----
   let dragSrcId = null;
 
   function renderEditorUI() {
-    container.innerHTML = `
-      <div class="editor-toolbar">
-        <span class="editor-toolbar-label">Add block:</span>
+    const addButtons = isBlogEditor
+      ? `
+        <button class="tb-btn" data-add="heading">+ Heading</button>
+        <button class="tb-btn" data-add="paragraph">+ Paragraph</button>
+        <button class="tb-btn" data-add="image">+ Image</button>
+        <button class="tb-btn" data-add="quote">+ Quote</button>
+        <button class="tb-btn" data-add="list">+ List</button>
+        <button class="tb-btn" data-add="img-text-left">+ Image + Text</button>
+        <button class="tb-btn" data-add="full-img">+ Full-width Image</button>
+      `
+      : `
         <button class="tb-btn" data-add="img-text-left">+ Image + Text</button>
         <button class="tb-btn" data-add="text-only">+ Text Only</button>
         <button class="tb-btn" data-add="full-img">+ Full-width Image</button>
+      `;
+
+    const blogMetaEditor = isBlogEditor ? `
+      <div class="blog-meta-editor">
+        <div class="blog-meta-grid">
+          <label>Title<input class="blog-meta-input" data-meta="title" value="${escapeHtml(postMeta.title)}"></label>
+          <label>Category<input class="blog-meta-input" data-meta="category" value="${escapeHtml(postMeta.category)}"></label>
+          <label>Tag<input class="blog-meta-input" data-meta="tag" value="${escapeHtml(postMeta.tag)}"></label>
+          <label>Date<input class="blog-meta-input" data-meta="date" type="date" value="${escapeHtml(postMeta.date)}"></label>
+          <label>Read Time<input class="blog-meta-input" data-meta="readTime" value="${escapeHtml(postMeta.readTime)}"></label>
+          <label>Color<input class="blog-meta-input" data-meta="color" value="${escapeHtml(postMeta.color)}"></label>
+          <label class="blog-meta-published"><input type="checkbox" data-meta="published" ${postMeta.published ? 'checked' : ''}> Published</label>
+        </div>
+        <label>Excerpt<textarea class="blog-meta-textarea" data-meta="excerpt">${escapeHtml(postMeta.excerpt)}</textarea></label>
       </div>
+    ` : '';
+
+    container.innerHTML = `
+      <div class="editor-toolbar">
+        <span class="editor-toolbar-label">Add block:</span>
+        ${addButtons}
+      </div>
+      ${blogMetaEditor}
       <div class="block-editor" id="block-editor-list">
         ${workingBlocks.map((block) => renderBlockEditorCard(block)).join('')}
       </div>
+      ${renderCarouselEditorHtml()}
       <div class="editor-save-bar">
         <button class="btn btn-primary" id="editor-save-btn">Save</button>
         <button class="btn btn-outline" id="editor-cancel-btn">Cancel</button>
@@ -2154,7 +2893,9 @@ function renderBlockEditor(project, container, options = {}) {
 
   function renderBlockEditorCard(block) {
     const isImgType = block.type === 'img-text-left' || block.type === 'img-text-right';
-    const isFullImg = block.type === 'full-img';
+    const isFullImg = block.type === 'full-img' || block.type === 'image';
+    const isSimpleText = ['heading', 'paragraph', 'quote'].includes(block.type);
+    const isListType = block.type === 'list';
 
     const typeQuickActions = `
       <div class="type-quick-actions" role="group" aria-label="Convert block type">
@@ -2174,7 +2915,12 @@ function renderBlockEditor(project, container, options = {}) {
       'img-text-left': 'Image + Text',
       'img-text-right': 'Image + Text',
       'full-img': 'Full-width Image',
-      'text-only': 'Text Only'
+      'text-only': 'Text Only',
+      heading: 'Heading',
+      paragraph: 'Paragraph',
+      quote: 'Quote',
+      list: 'List',
+      image: 'Image'
     }[block.type] || 'Block';
 
     const imgSlot = (isImgType || isFullImg) ? `
@@ -2187,14 +2933,24 @@ function renderBlockEditor(project, container, options = {}) {
         <input type="file" accept="image/*" style="display:none;" data-file-input="${block.id}">
       </div>` : '';
 
-    const textFields = block.type !== 'full-img' ? `
+    const textFields = block.type !== 'full-img' && block.type !== 'image' && block.type !== 'list' ? `
       <div contenteditable="true" class="block-title-edit" data-field="title" data-block-id="${block.id}" data-placeholder="Block title (optional)">${escapeHtml(block.title || '')}</div>
       <div contenteditable="true" class="block-text-edit" data-field="text" data-block-id="${block.id}" data-placeholder="Add text...">${escapeHtml(block.text || '')}</div>
+    ` : '';
+    const simpleTextField = isSimpleText ? `
+      <div contenteditable="true" class="block-text-edit" data-field="text" data-block-id="${block.id}" data-placeholder="Add text...">${escapeHtml(block.text || '')}</div>
+    ` : '';
+    const listField = isListType ? `
+      <div contenteditable="true" class="block-text-edit" data-field="text" data-block-id="${block.id}" data-placeholder="One item per line">${escapeHtml((block.items || []).join('\n') || block.text || '')}</div>
+    ` : '';
+    const captionField = (block.type === 'image' || block.type === 'full-img') ? `
+      <input class="blog-meta-input block-alt-input" data-field="alt" data-block-id="${block.id}" value="${escapeHtml(block.alt || '')}" placeholder="Image alt text">
+      <input class="blog-meta-input block-caption-input" data-field="caption" data-block-id="${block.id}" value="${escapeHtml(block.caption || '')}" placeholder="Image caption (optional)">
     ` : '';
 
     const bodyContent = isImgType
       ? `<div class="editor-block-two-col ${block.type === 'img-text-right' ? 'img-right' : 'img-left'}">${imgSlot}<div class="editor-block-text-col">${textFields}</div></div>`
-      : `${imgSlot}${textFields}`;
+      : `${imgSlot}${simpleTextField || textFields || ''}${listField}${captionField}`;
 
     return `
       <div class="editor-block" draggable="true" data-block-id="${block.id}">
@@ -2269,8 +3025,35 @@ function renderBlockEditor(project, container, options = {}) {
       const blockId = el.dataset.blockId;
       el.addEventListener('input', () => {
         const block = workingBlocks.find((b) => b.id === blockId);
-        if (block) block[field] = el.innerText;
+        if (!block) return;
+        if (block.type === 'list' && field === 'text') {
+          const items = el.innerText.split('\n').map((s) => s.trim()).filter(Boolean);
+          block.items = items;
+          block.text = items.join('\n');
+          return;
+        }
+        block[field] = el.innerText;
       });
+    });
+    container.querySelectorAll('input[data-field], textarea[data-field]').forEach((el) => {
+      el.addEventListener('input', () => {
+        const block = workingBlocks.find((b) => b.id === el.dataset.blockId);
+        if (block) block[el.dataset.field] = el.value;
+      });
+    });
+    container.querySelectorAll('.blog-meta-input[data-meta], .blog-meta-textarea[data-meta]').forEach((el) => {
+      el.addEventListener('input', () => {
+        const key = el.dataset.meta;
+        if (!postMeta || !key) return;
+        postMeta[key] = el.type === 'checkbox' ? el.checked : el.value;
+      });
+      if (el.type === 'checkbox') {
+        el.addEventListener('change', () => {
+          const key = el.dataset.meta;
+          if (!postMeta || !key) return;
+          postMeta[key] = el.checked;
+        });
+      }
     });
 
     // --- Drag and Drop ---
@@ -2309,6 +3092,84 @@ function renderBlockEditor(project, container, options = {}) {
       });
     });
 
+    // --- Project image carousel (edit mode only) ---
+    if (!isBlogEditor) {
+      const addCarouselBtn = container.querySelector('#carousel-add-slide-btn');
+      const carouselFileInput = container.querySelector('#carousel-file-input');
+      if (addCarouselBtn && carouselFileInput) {
+        addCarouselBtn.addEventListener('click', () => carouselFileInput.click());
+        carouselFileInput.addEventListener('change', (e) => {
+          const files = e.target.files;
+          if (!files?.length) return;
+          Promise.all(
+            Array.from(files).map(
+              (file) =>
+                new Promise((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onload = (ev) => resolve(ev.target.result);
+                  reader.onerror = () => reject(new Error('read failed'));
+                  reader.readAsDataURL(file);
+                })
+            )
+          )
+            .then((urls) => {
+              urls.forEach((src) => {
+                workingCarousel.push({
+                  id: generateCarouselId(),
+                  src,
+                  alt: '',
+                  caption: ''
+                });
+              });
+              carouselFileInput.value = '';
+              redraw();
+            })
+            .catch(() => {
+              carouselFileInput.value = '';
+              showToast('Could not read one or more images');
+            });
+        });
+      }
+
+      container.querySelectorAll('[data-carousel-remove]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.carouselRemove;
+          const ix = workingCarousel.findIndex((s) => s.id === id);
+          if (ix !== -1) workingCarousel.splice(ix, 1);
+          redraw();
+        });
+      });
+
+      container.querySelectorAll('[data-carousel-up]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.carouselUp;
+          const ix = workingCarousel.findIndex((s) => s.id === id);
+          if (ix > 0) {
+            [workingCarousel[ix - 1], workingCarousel[ix]] = [workingCarousel[ix], workingCarousel[ix - 1]];
+            redraw();
+          }
+        });
+      });
+
+      container.querySelectorAll('[data-carousel-down]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.carouselDown;
+          const ix = workingCarousel.findIndex((s) => s.id === id);
+          if (ix !== -1 && ix < workingCarousel.length - 1) {
+            [workingCarousel[ix + 1], workingCarousel[ix]] = [workingCarousel[ix], workingCarousel[ix + 1]];
+            redraw();
+          }
+        });
+      });
+
+      container.querySelectorAll('input[data-carousel-field][data-carousel-id]').forEach((el) => {
+        el.addEventListener('input', () => {
+          const slide = workingCarousel.find((s) => s.id === el.dataset.carouselId);
+          if (slide) slide[el.dataset.carouselField] = el.value;
+        });
+      });
+    }
+
     // --- Save ---
     const saveBtn = container.querySelector('#editor-save-btn');
     if (saveBtn) {
@@ -2321,10 +3182,35 @@ function renderBlockEditor(project, container, options = {}) {
 
         // Write back to the in-memory project
         project.blocks = JSON.parse(JSON.stringify(workingBlocks));
+        if (!isBlogEditor) {
+          project.carouselImages = workingCarousel.map(({ src, alt, caption }) => ({
+            src,
+            alt: alt || '',
+            caption: caption || ''
+          }));
+        }
+        if (isBlogEditor && postMeta) {
+          project.title = postMeta.title;
+          project.category = postMeta.category;
+          project.tag = postMeta.tag;
+          project.date = postMeta.date;
+          project.readTime = postMeta.readTime;
+          project.excerpt = postMeta.excerpt;
+          project.color = postMeta.color || DEFAULT_POST_COLOR;
+          project.published = Boolean(postMeta.published);
+          project.updatedAt = new Date().toISOString();
+        }
 
         // Also update in allProjects array
         const idx = collection.findIndex((p) => p.id === project.id);
-        if (idx !== -1) collection[idx].blocks = project.blocks;
+        if (idx !== -1) {
+          collection[idx] = {
+            ...collection[idx],
+            ...project,
+            blocks: project.blocks,
+            carouselImages: project.carouselImages || []
+          };
+        }
 
         // Generate export JSON
         const exportJson = JSON.stringify(collection, null, 2);
@@ -2426,7 +3312,10 @@ function showJsonExportOverlay(container, json, options = {}, ui = {}) {
 function switchProjectPageToViewMode(project) {
   const sectionsContainer = document.querySelector('.pp-block-area');
   if (!sectionsContainer) return;
-  sectionsContainer.innerHTML = renderBlocks(project);
+  sectionsContainer.innerHTML = renderBlocks(project) + renderProjectCarousel(project);
+
+  const page = document.getElementById('project-page');
+  if (page) initProjectCarousel(page);
 
   const editBtn = document.getElementById('pp-edit-btn');
   if (editBtn) editBtn.textContent = '✏ Edit';
@@ -2456,9 +3345,8 @@ function renderBlogPostBlocks(post) {
     ? post.blocks
     : [{
       id: 'pb0',
-      type: 'text-only',
-      title: '',
-      text: post.excerpt || '',
+      type: 'paragraph',
+      text: post.excerpt || 'No content yet.',
       img: null
     }];
   return `<div class="blocks-container">
@@ -2470,6 +3358,21 @@ function switchBlogPageToViewMode(post) {
   const sectionsContainer = document.querySelector('.bp-block-area');
   if (!sectionsContainer) return;
   sectionsContainer.innerHTML = renderBlogPostBlocks(post);
+  const hero = document.getElementById('blog-page');
+  if (hero) {
+    const titleEl = hero.querySelector('.pp-title');
+    const excerptEl = hero.querySelector('.pp-description');
+    const dateEl = hero.querySelector('.bp-date');
+    const readEl = hero.querySelector('.bp-read-time');
+    const categoryEl = hero.querySelector('.bp-meta-row .blog-tag');
+    const tagEl = hero.querySelector('.bp-meta-row .blog-tag--secondary');
+    if (titleEl) titleEl.textContent = post.title || 'Untitled Post';
+    if (excerptEl) excerptEl.textContent = post.excerpt || '';
+    if (dateEl) dateEl.textContent = post.date || '';
+    if (readEl) readEl.textContent = `${post.readTime || ''} read`;
+    if (categoryEl) categoryEl.textContent = post.category || 'Blog';
+    if (tagEl) tagEl.textContent = post.tag || '';
+  }
 
   const editBtn = document.getElementById('bp-edit-btn');
   if (editBtn) editBtn.textContent = '✏ Edit';
@@ -2487,6 +3390,7 @@ function switchBlogPageToEditMode(post) {
   renderBlockEditor(post, sectionsContainer, {
     collection: allPosts,
     exportFileName: 'posts.json',
+    editorMode: 'blog',
     onCloseView: () => switchBlogPageToViewMode(post)
   });
 
@@ -2557,7 +3461,7 @@ function renderBlogPostPage(post) {
   window.scrollTo(0, 0);
 
   document.getElementById('bp-back-btn').addEventListener('click', () => {
-    window.location.hash = '#blog';
+    window.location.hash = '#/blog';
   });
 }
 
