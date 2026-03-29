@@ -4269,10 +4269,56 @@ textarea:focus-visible {
   margin: 0 auto;
 }
 
+#blog .blog-section-head {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+#blog .blog-section-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 #blog .section-subtitle {
   text-align: left;
-  color: rgba(255,255,255,0.4);
+  color: var(--color-text-muted);
   font-size: 0.95rem;
+}
+
+/* Shoelace — blog editor polish (scoped) */
+.sl-blog-editor {
+  --sl-font-sans: var(--font-sans);
+  --sl-font-mono: var(--font-mono);
+  --sl-color-primary-600: var(--color-accent);
+  --sl-color-primary-700: var(--color-accent);
+  --sl-color-neutral-0: var(--color-bg);
+  --sl-color-neutral-50: var(--color-surface);
+  --sl-color-neutral-100: var(--color-surface);
+  --sl-color-neutral-200: var(--color-border);
+  --sl-color-neutral-900: var(--color-text);
+}
+
+.sl-blog-editor .sl-blog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.sl-blog-editor .sl-blog-published {
+  align-self: end;
+  margin-bottom: 6px;
+}
+
+@media (max-width: 640px) {
+  .sl-blog-editor .sl-blog-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Light theme overrides */

@@ -5,6 +5,95 @@ let allProjects = [];
 let allPosts = [];
 let activeProjectsFileName = 'projects.json';
 const DEFAULT_POST_COLOR = '#0f172a';
+const BLOG_FEATURE_ENABLED = false;
+
+const BLOG_COLOR_PALETTE = [
+  '#0f172a', // slate 900
+  '#111827', // gray 900
+  '#0b1020',
+  '#0a1628',
+  '#1a0a2e',
+  '#1f0a0a',
+  '#0f1f0f',
+  '#0b1b1a',
+  '#131a2c',
+  '#1b1230',
+  '#0b1320',
+  '#111b2e'
+];
+
+function pickRandomBlogColor() {
+  const i = Math.floor(Math.random() * BLOG_COLOR_PALETTE.length);
+  return BLOG_COLOR_PALETTE[i] || DEFAULT_POST_COLOR;
+}
+
+function createDraftPost() {
+  const now = new Date();
+  const id = `post-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const isoDate = now.toISOString().slice(0, 10);
+  return {
+    id,
+    title: 'Untitled Post',
+    category: 'Blog',
+    tag: '',
+    date: isoDate,
+    readTime: '5 min',
+    excerpt: '',
+    color: pickRandomBlogColor(),
+    published: false,
+    updatedAt: now.toISOString(),
+    blocks: [{ id: `pb-${id}-0`, type: 'paragraph', text: '' }]
+  };
+}
+
+function showJsonExportOverlaySimple(container, json, exportFileName) {
+  const existing = container.querySelector('.json-export-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'json-export-overlay';
+  overlay.innerHTML = `
+    <p>Copy the JSON below and paste it into <code>${escapeHtml(exportFileName)}</code> to persist your changes:</p>
+    <textarea class="json-export-textarea" readonly></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary json-copy-btn">Copy JSON</button>
+      <button class="btn btn-outline json-close-overlay-btn">Close</button>
+    </div>
+  `;
+  container.appendChild(overlay);
+  const jsonTextarea = overlay.querySelector('.json-export-textarea');
+  if (jsonTextarea) jsonTextarea.value = json;
+
+  overlay.querySelector('.json-copy-btn')?.addEventListener('click', () => {
+    navigator.clipboard.writeText(json)
+      .then(() => showToast('JSON copied to clipboard!'))
+      .catch(() => showToast('Copy failed — select the textarea and copy manually'));
+  });
+  overlay.querySelector('.json-close-overlay-btn')?.addEventListener('click', () => overlay.remove());
+  overlay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function persistPostsJson() {
+  const exportJson = JSON.stringify(allPosts, null, 2);
+  const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  if (isLocalhost) {
+    return fetch('/__save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file: 'posts.json', content: exportJson })
+    }).then(async (r) => {
+      if (!r.ok) {
+        const data = await r.json().catch(() => ({}));
+        throw new Error(data?.error || `HTTP ${r.status}`);
+      }
+      return true;
+    });
+  }
+
+  const blogSection = document.getElementById('blog') || document.body;
+  showJsonExportOverlaySimple(blogSection, exportJson, 'posts.json');
+  return Promise.resolve(false);
+}
 // ======================
 // Edit Auth (URL Passphrase)
 // ======================
@@ -919,6 +1008,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize theme
   initTheme();
+  applyBlogFeatureVisibility();
   const themeToggleBtn = document.querySelector('.theme-toggle');
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener('click', toggleTheme);
@@ -966,6 +1056,40 @@ document.addEventListener('DOMContentLoaded', () => {
   }).catch(error => {
     console.error('Failed to load initial data:', error);
   });
+
+  // Blog: show New post button if authorized
+  if (!BLOG_FEATURE_ENABLED) {
+    const actions = document.getElementById('blog-section-actions');
+    if (actions) actions.hidden = true;
+  } else {
+  checkEditAuth().then((authorized) => {
+    if (!authorized) return;
+    const actions = document.getElementById('blog-section-actions');
+    if (!actions) return;
+    actions.hidden = false;
+    actions.innerHTML = `
+      <button type="button" class="btn btn-primary" id="blog-new-post-btn">New post</button>
+    `;
+    actions.querySelector('#blog-new-post-btn')?.addEventListener('click', async () => {
+      if (!allPosts.length) {
+        await loadPostsData();
+      }
+      const draft = normalizePost(createDraftPost());
+      allPosts = [draft, ...allPosts.filter((p) => String(p.id) !== String(draft.id))].sort(sortPostsByDateDesc);
+      persistPostsJson()
+        .then(() => showToast('Draft created'))
+        .catch((err) => {
+          console.error('Failed to persist posts.json:', err);
+          showToast('Draft created (save failed — copy JSON below)');
+          const blogSection = document.getElementById('blog') || document.body;
+          showJsonExportOverlaySimple(blogSection, JSON.stringify(allPosts, null, 2), 'posts.json');
+        });
+      window.location.hash = `/blog/${encodeURIComponent(draft.id)}`;
+      // Once page renders, switch into edit mode automatically.
+      setTimeout(() => switchBlogPageToEditMode(draft), 0);
+    });
+  });
+  }
 
   // Add copy email button listener (if it still exists)
   const copyEmailBtn = document.getElementById('copy-email');
@@ -2273,8 +2397,24 @@ function getMainContent() {
   return document.getElementById('main-content');
 }
 
+function applyBlogFeatureVisibility() {
+  const blogSection = document.getElementById('blog');
+  const blogNavLink = document.querySelector('.nav-links a[href="#blog"]');
+  if (BLOG_FEATURE_ENABLED) {
+    if (blogSection) blogSection.hidden = false;
+    if (blogNavLink) blogNavLink.hidden = false;
+    return;
+  }
+  if (blogSection) blogSection.hidden = true;
+  if (blogNavLink) blogNavLink.hidden = true;
+}
+
 function router() {
   const hash = window.location.hash;
+  if (!BLOG_FEATURE_ENABLED && (hash === '#/blog' || hash === '#blog' || /^#\/blog\/.+$/.test(hash))) {
+    showHomePage();
+    return;
+  }
   if (hash === '#/blog') {
     renderBlogIndexPage();
     return;
@@ -2843,8 +2983,17 @@ function renderBlockEditor(project, container, options = {}) {
   let dragSrcId = null;
 
   function renderEditorUI() {
+    const useShoelaceButtons = typeof customElements !== 'undefined' && Boolean(customElements.get('sl-button'));
     const addButtons = isBlogEditor
-      ? `
+      ? (useShoelaceButtons ? `
+        <sl-button variant="default" size="small" data-add="heading">+ Heading</sl-button>
+        <sl-button variant="default" size="small" data-add="paragraph">+ Paragraph</sl-button>
+        <sl-button variant="default" size="small" data-add="image">+ Image</sl-button>
+        <sl-button variant="default" size="small" data-add="quote">+ Quote</sl-button>
+        <sl-button variant="default" size="small" data-add="list">+ List</sl-button>
+        <sl-button variant="default" size="small" data-add="img-text-left">+ Image + Text</sl-button>
+        <sl-button variant="default" size="small" data-add="full-img">+ Full-width Image</sl-button>
+      ` : `
         <button class="tb-btn" data-add="heading">+ Heading</button>
         <button class="tb-btn" data-add="paragraph">+ Paragraph</button>
         <button class="tb-btn" data-add="image">+ Image</button>
@@ -2852,14 +3001,32 @@ function renderBlockEditor(project, container, options = {}) {
         <button class="tb-btn" data-add="list">+ List</button>
         <button class="tb-btn" data-add="img-text-left">+ Image + Text</button>
         <button class="tb-btn" data-add="full-img">+ Full-width Image</button>
-      `
-      : `
+      `)
+      : (useShoelaceButtons ? `
+        <sl-button variant="default" size="small" data-add="img-text-left">+ Image + Text</sl-button>
+        <sl-button variant="default" size="small" data-add="text-only">+ Text Only</sl-button>
+        <sl-button variant="default" size="small" data-add="full-img">+ Full-width Image</slbutton>
+      ` : `
         <button class="tb-btn" data-add="img-text-left">+ Image + Text</button>
         <button class="tb-btn" data-add="text-only">+ Text Only</button>
         <button class="tb-btn" data-add="full-img">+ Full-width Image</button>
-      `;
+      `);
 
-    const blogMetaEditor = isBlogEditor ? `
+    const slReady = typeof customElements !== 'undefined' && Boolean(customElements.get('sl-input'));
+    const blogMetaEditor = isBlogEditor ? (slReady ? `
+      <div class="blog-meta-editor sl-blog-editor">
+        <div class="sl-blog-grid">
+          <sl-input label="Title" data-meta="title" value="${escapeHtml(postMeta.title)}"></sl-input>
+          <sl-input label="Category" data-meta="category" value="${escapeHtml(postMeta.category)}"></sl-input>
+          <sl-input label="Tag" data-meta="tag" value="${escapeHtml(postMeta.tag)}"></sl-input>
+          <sl-input label="Date" type="date" data-meta="date" value="${escapeHtml(postMeta.date)}"></sl-input>
+          <sl-input label="Read time" data-meta="readTime" value="${escapeHtml(postMeta.readTime)}"></sl-input>
+          <sl-input label="Color" data-meta="color" value="${escapeHtml(postMeta.color)}"></sl-input>
+          <sl-switch class="sl-blog-published" data-meta="published" ${postMeta.published ? 'checked' : ''}>Published</sl-switch>
+        </div>
+        <sl-textarea label="Excerpt" data-meta="excerpt" resize="auto">${escapeHtml(postMeta.excerpt)}</sl-textarea>
+      </div>
+    ` : `
       <div class="blog-meta-editor">
         <div class="blog-meta-grid">
           <label>Title<input class="blog-meta-input" data-meta="title" value="${escapeHtml(postMeta.title)}"></label>
@@ -2872,7 +3039,7 @@ function renderBlockEditor(project, container, options = {}) {
         </div>
         <label>Excerpt<textarea class="blog-meta-textarea" data-meta="excerpt">${escapeHtml(postMeta.excerpt)}</textarea></label>
       </div>
-    ` : '';
+    `) : '';
 
     container.innerHTML = `
       <div class="editor-toolbar">
@@ -2885,8 +3052,11 @@ function renderBlockEditor(project, container, options = {}) {
       </div>
       ${renderCarouselEditorHtml()}
       <div class="editor-save-bar">
-        <button class="btn btn-primary" id="editor-save-btn">Save</button>
-        <button class="btn btn-outline" id="editor-cancel-btn">Cancel</button>
+        ${useShoelaceButtons
+          ? `<sl-button variant="primary" id="editor-save-btn">Save</sl-button>
+              <sl-button variant="default" id="editor-cancel-btn">Cancel</sl-button>`
+          : `<button class="btn btn-primary" id="editor-save-btn">Save</button>
+              <button class="btn btn-outline" id="editor-cancel-btn">Cancel</button>`}
       </div>
     `;
   }
@@ -3041,6 +3211,8 @@ function renderBlockEditor(project, container, options = {}) {
         if (block) block[el.dataset.field] = el.value;
       });
     });
+    // --- Blog meta (blog editor mode) ---
+    // Fallback inputs (native)
     container.querySelectorAll('.blog-meta-input[data-meta], .blog-meta-textarea[data-meta]').forEach((el) => {
       el.addEventListener('input', () => {
         const key = el.dataset.meta;
@@ -3054,6 +3226,27 @@ function renderBlockEditor(project, container, options = {}) {
           postMeta[key] = el.checked;
         });
       }
+    });
+
+    // Shoelace components
+    container.querySelectorAll('sl-input[data-meta], sl-textarea[data-meta]').forEach((el) => {
+      el.addEventListener('sl-input', () => {
+        const key = el.dataset.meta;
+        if (!postMeta || !key) return;
+        postMeta[key] = el.value;
+      });
+      el.addEventListener('sl-change', () => {
+        const key = el.dataset.meta;
+        if (!postMeta || !key) return;
+        postMeta[key] = el.value;
+      });
+    });
+    container.querySelectorAll('sl-switch[data-meta]').forEach((el) => {
+      el.addEventListener('sl-change', () => {
+        const key = el.dataset.meta;
+        if (!postMeta || !key) return;
+        postMeta[key] = Boolean(el.checked);
+      });
     });
 
     // --- Drag and Drop ---

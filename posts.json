@@ -1,5 +1,25 @@
 [
   {
+    "id": "post-1774796983718-f24m0",
+    "title": "Untitled Post",
+    "category": "Blog",
+    "tag": "",
+    "date": "2026-03-29",
+    "readTime": "5 min",
+    "excerpt": "",
+    "color": "#111b2e",
+    "published": false,
+    "updatedAt": "2026-03-29T15:09:43.718Z",
+    "blocks": [
+      {
+        "id": "pb-post-1774796983718-f24m0-0",
+        "type": "paragraph",
+        "text": ""
+      }
+    ],
+    "coverImage": ""
+  },
+  {
     "id": "esp32-rtos-month-one",
     "title": "Building an ESP32 RTOS from Scratch: Month One",
     "category": "Systems",
@@ -9,7 +29,15 @@
     "excerpt": "What happens when you ignore FreeRTOS entirely and roll your own task scheduler on bare metal. Spoiler: pain, then enlightenment.",
     "color": "#1a0a2e",
     "published": true,
-    "updatedAt": "2025-03-10T00:00:00.000Z"
+    "updatedAt": "2025-03-10T00:00:00.000Z",
+    "coverImage": "",
+    "blocks": [
+      {
+        "id": "pb-esp32-rtos-month-one-0",
+        "type": "paragraph",
+        "text": "What happens when you ignore FreeRTOS entirely and roll your own task scheduler on bare metal. Spoiler: pain, then enlightenment."
+      }
+    ]
   },
   {
     "id": "digital-logic-tips",
@@ -21,7 +49,15 @@
     "excerpt": "The stuff that clicked for me after three semesters of confusion - Karnaugh maps, metastability, and why your professor glosses over timing.",
     "color": "#0a1628",
     "published": true,
-    "updatedAt": "2025-02-22T00:00:00.000Z"
+    "updatedAt": "2025-02-22T00:00:00.000Z",
+    "coverImage": "",
+    "blocks": [
+      {
+        "id": "pb-digital-logic-tips-0",
+        "type": "paragraph",
+        "text": "The stuff that clicked for me after three semesters of confusion - Karnaugh maps, metastability, and why your professor glosses over timing."
+      }
+    ]
   },
   {
     "id": "create-x-update",
@@ -33,7 +69,15 @@
     "excerpt": "Six weeks into Georgia Tech's Create-X accelerator. Here's what the product looks like, what we got wrong, and what we're shipping next.",
     "color": "#0f1f0f",
     "published": true,
-    "updatedAt": "2025-01-15T00:00:00.000Z"
+    "updatedAt": "2025-01-15T00:00:00.000Z",
+    "coverImage": "",
+    "blocks": [
+      {
+        "id": "pb-create-x-update-0",
+        "type": "paragraph",
+        "text": "Six weeks into Georgia Tech's Create-X accelerator. Here's what the product looks like, what we got wrong, and what we're shipping next."
+      }
+    ]
   },
   {
     "id": "threejs-portfolio-deep-dive",
@@ -45,6 +89,14 @@
     "excerpt": "It's probably overkill. Here's why I did it anyway and what I learned about WebGL performance on mobile.",
     "color": "#1f0a0a",
     "published": true,
-    "updatedAt": "2024-12-01T00:00:00.000Z"
+    "updatedAt": "2024-12-01T00:00:00.000Z",
+    "coverImage": "",
+    "blocks": [
+      {
+        "id": "pb-threejs-portfolio-deep-dive-0",
+        "type": "paragraph",
+        "text": "It's probably overkill. Here's why I did it anyway and what I learned about WebGL performance on mobile."
+      }
+    ]
   }
 ]

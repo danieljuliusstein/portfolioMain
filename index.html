@@ -16,6 +16,10 @@
   <link rel="preload" href="main.js" as="script">
   
   <link rel="stylesheet" href="styles.css">
+  <!-- Shoelace (UI components) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/themes/light.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/themes/dark.css">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/shoelace.js"></script>
   <!-- Fallback for no JS -->
   <noscript>
     <style>
@@ -190,8 +194,13 @@
     <!-- BLOG SECTION -->
     <section id="blog" class="section">
       <div class="section-header">
-        <h2 class="section-title">Writing</h2>
-        <p class="section-subtitle">Notes on systems, hardware, and building things.</p>
+        <div class="blog-section-head">
+          <div>
+            <h2 class="section-title">Writing</h2>
+            <p class="section-subtitle">Notes on systems, hardware, and building things.</p>
+          </div>
+          <div class="blog-section-actions" id="blog-section-actions" hidden></div>
+        </div>
       </div>
       <div class="blog-grid" id="blog-grid">
         <!-- Populated by blog.js -->
