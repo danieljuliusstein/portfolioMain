@@ -2,15 +2,23 @@
 // Provides offline capability and caching
 
 const CACHE_NAME = 'portfolio-v1';
+
+// Subdirectory deploys: SW lives at /repo/service-worker.js → cache /repo/…
+const SW_PREFIX = new URL('.', self.location.href).pathname.replace(/\/?$/, '');
+function sitePath(rel) {
+  const r = rel.startsWith('/') ? rel : `/${rel}`;
+  return SW_PREFIX ? `${SW_PREFIX}${r}` : r;
+}
+
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/main.js',
-  '/blog.js',
-  '/projects.json',
-  '/posts.json',
-  '/DJSResume.pdf'
+  sitePath('/'),
+  sitePath('/index.html'),
+  sitePath('/styles.css'),
+  sitePath('/main.js'),
+  sitePath('/blog.js'),
+  sitePath('/projects.json'),
+  sitePath('/posts.json'),
+  sitePath('/DJSResume.pdf')
 ];
 
 // Install event - cache static assets

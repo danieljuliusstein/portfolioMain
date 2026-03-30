@@ -7,6 +7,29 @@ let activeProjectsFileName = 'projects.json';
 const DEFAULT_POST_COLOR = '#0f172a';
 const BLOG_FEATURE_ENABLED = false;
 
+/** Base path for subdirectory deploys (e.g. GitHub Pages project sites). Optional: <meta name="app-base-path" content="/portfolioMain"> */
+function getAppBasePath() {
+  const meta = document.querySelector('meta[name="app-base-path"]');
+  if (meta && meta.content.trim()) {
+    let p = meta.content.trim().replace(/\/$/, '');
+    return p.startsWith('/') ? p : `/${p}`;
+  }
+  let path = window.location.pathname.replace(/\/index\.html$/i, '');
+  path = path.replace(/\/$/, '');
+  if (!path || path === '/') return '';
+  return path;
+}
+
+/** Prefix root-absolute paths with app base (so /file works under /repoName/). */
+function resolveSitePath(url) {
+  if (url == null || url === '') return url;
+  const s = String(url).trim();
+  if (!s || /^https?:\/\//i.test(s) || s.startsWith('data:') || s.startsWith('blob:')) return url;
+  if (!s.startsWith('/')) return url;
+  const base = getAppBasePath();
+  return base ? `${base}${s}` : s;
+}
+
 const BLOG_COLOR_PALETTE = [
   '#0f172a', // slate 900
   '#111827', // gray 900
@@ -292,13 +315,17 @@ function normalizeProject(project) {
   const tags = Array.isArray(project.tags)
     ? project.tags
     : (Array.isArray(project.technologies) ? project.technologies : []);
+  const stlUrl = project.stlUrl && String(project.stlUrl).trim() !== ''
+    ? resolveSitePath(project.stlUrl)
+    : '';
   return {
     ...project,
     tags,
     thumbnail: project.thumbnail || project.image || '',
     thumbnailAlt: project.thumbnailAlt || project.imageAlt || 'Project screenshot',
     longDescription: project.longDescription || project.description || '',
-    carouselImages: Array.isArray(project.carouselImages) ? project.carouselImages : []
+    carouselImages: Array.isArray(project.carouselImages) ? project.carouselImages : [],
+    stlUrl
   };
 }
 
@@ -1247,7 +1274,10 @@ function registerServiceWorker() {
   const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
   // Only register service worker in non-local environments (and not file:// protocol)
   if ('serviceWorker' in navigator && window.location.protocol !== 'file:' && !isLocalhost) {
-    navigator.serviceWorker.register('/service-worker.js')
+    const base = getAppBasePath();
+    const scriptURL = `${base}/service-worker.js`;
+    const scope = base ? `${base}/` : '/';
+    navigator.serviceWorker.register(scriptURL, { scope })
       .then((registration) => {
         console.log('[Service Worker] Registered successfully:', registration.scope);
         
