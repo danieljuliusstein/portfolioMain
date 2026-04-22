@@ -59,14 +59,6 @@
         "alt": "Custom PCB during soldering and firmware bring-up"
       },
       {
-        "id": "b3",
-        "type": "image",
-        "title": "Component Inventory",
-        "img": "images/drone/esp32_component_inventory.svg",
-        "alt": "ESP32 drone component inventory diagram",
-        "caption": "Component inventory used during sourcing and board population"
-      },
-      {
         "id": "b4",
         "type": "text-only",
         "title": "Parts Used",
