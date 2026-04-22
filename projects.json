@@ -2,7 +2,7 @@
   {
     "id": "esp-fly",
     "title": "ESP-FLY Mini Drone",
-    "description": "ECE Discovery Project: a custom micro drone built from scratch around a XIAO ESP32-S3, with custom PCB hardware, 3D-printed frame, and PID flight-control firmware.",
+    "description": "For my Discovery Project, I built a fully functional mini drone powered by an ESP32-S3, combining custom PCB hardware, embedded firmware, and PID-based flight stabilization.",
     "discoveryProject": true,
     "tags": [
       "ESP32-S3",
@@ -22,23 +22,23 @@
     "sections": [
       {
         "heading": "Project Idea",
-        "content": "I set out to build a mini drone from scratch using an ESP32 microcontroller because I wanted a true end-to-end hardware/software challenge. Instead of using an off-the-shelf flight stack, I focused on learning the fundamentals myself: component selection, board assembly, embedded firmware, and control loops. The build combines a custom PCB order from JLCPCB, a 3D-printed frame, and full manual assembly while staying under a total project cost of about $40."
+        "content": "For my Discovery Project, I set out to build a fully functional mini drone powered by an ESP32 microcontroller. I have always been fascinated by drones and robotics, and I wanted to go beyond just flying one. I wanted to actually understand and build the hardware and software that makes it work. The project involved designing and assembling a custom PCB, soldering SMD components, wiring the ESP32, and writing firmware to control all four motors."
       },
       {
         "heading": "Project Progress",
-        "content": "I sourced and integrated all core parts: XIAO ESP32-S3, MPU6050 IMU, SI2300 MOSFETs, diodes, SMD resistors/capacitors/LEDs, coreless motors, and a LiPo battery. After hardware assembly, I moved into firmware by configuring PWM motor outputs and I2C IMU communication. The firmware loop is running, motors respond to control input, and current work is focused on PID calibration for stable takeoff."
+        "content": "Over the semester, I worked through this in stages. First I sourced and assembled the hardware: getting the custom PCB fabricated, placing and soldering SMD components like resistors, capacitors, and motor driver circuitry, and wiring the ESP32 to the board. Next I moved into firmware. I configured the ESP32 to communicate with the motor control path using PWM signals and got the motors to arm and respond to throttle commands. After that I integrated the IMU for attitude sensing and started tuning the PID loop for stabilization. At this point the drone is mostly complete. The hardware is built, the motors are functional, and the remaining work is final tuning for stable flight."
       },
       {
         "heading": "Successes and Failures",
-        "content": "A major early challenge was first-time SMD soldering with 0805 parts, where I learned practical rework techniques using flux, hot air, and solder wick. I also had a first-power failure that shorted the circuit and damaged a LiPo, which reinforced the habit of continuity testing before power-up. The biggest remaining blocker is frame warp: small geometry tilt introduces IMU offset, causing PID over-correction and unstable liftoff. Even with setbacks, the full hardware stack is assembled and functional from zero prior soldering experience."
+        "content": "My biggest challenge was getting the motor drive path to behave correctly at startup. The PWM initialization had to be in the right range and sequence, otherwise the motors would not spin. I spent a lot of time debugging signal timing and understanding that startup behavior in detail. On the success side, I was really proud when all four motors finally spun up reliably and responded to control input. Successfully soldering the SMD components without bridging pads was another major win for me, especially since this was my first time working at that scale."
       },
       {
         "heading": "ECE Skills Gained",
-        "content": "This project gave me hands-on experience with SMD assembly, schematic interpretation, embedded communication, and control systems integration. I used PWM for motor control, I2C for IMU data, and closed-loop PID logic for stabilization behavior. It also strengthened debugging discipline across mechanical, electrical, and software layers in a single system."
+        "content": "This project touched several core ECE skills. First was embedded systems programming: I used the ESP32 Arduino framework to implement PWM output, sensor reads, and real-time control logic. Second was circuit assembly and PCB familiarity: reading the schematic, matching footprints to placements, and soldering fine-pitch SMD parts. Third was communication interfaces: PWM for motor control and I2C for IMU communication. Finally, implementing a PID loop gave me real hands-on feedback control experience beyond what I had only seen in theory before."
       },
       {
         "heading": "Final Thoughts",
-        "content": "This has been one of my hardest and most rewarding builds so far. Going from no soldering experience to a functioning embedded flight platform confirmed how much I enjoy the hardware side of ECE. My next milestone is stable untethered liftoff by improving frame flatness and tuning, then exploring autonomy features after reliable manual control."
+        "content": "Overall, this project deepened my interest in embedded systems and robotics. Seeing hardware and software come together in a system that physically moves is extremely motivating to me. It confirmed that embedded and controls is the direction I want to keep pursuing. My next steps are to finish stable flight and then add wireless telemetry so I can tune PID gains in real time."
       }
     ],
     "blocks": [
@@ -46,54 +46,76 @@
         "id": "b1",
         "type": "text-only",
         "title": "Project Idea",
-        "text": "Built a mini drone from scratch around the XIAO ESP32-S3 to learn the full hardware/software stack end-to-end. I designed around a custom PCB + 3D-printed frame workflow and kept total cost under about $40.",
+        "text": "For my Discovery Project, I set out to build a fully functional mini drone powered by an ESP32 microcontroller. I have always been fascinated by drones and robotics, and I wanted to go beyond just flying one. I wanted to understand and build the hardware and software that actually makes it work.",
         "img": null
       },
       {
         "id": "b2",
         "type": "img-text-right",
-        "title": "Parts and Assembly",
-        "text": "Key components include the XIAO ESP32-S3, MPU6050 IMU, SI2300 MOSFETs, diodes, SMD passives, coreless motors, and a LiPo battery. I sourced everything individually, then assembled and reworked the board by hand.",
-        "img": "images/drone/IMG_5051-243dfd83-9f69-4fdd-bcea-58157e7725c7.png",
-        "alt": "Labeled spread of ESP32 drone components"
-      },
-      {
-        "id": "b3",
-        "type": "img-text-left",
-        "title": "Firmware Progress",
-        "text": "After assembly, I implemented PWM motor output and I2C IMU reads on the ESP32. The motors spin and respond to commands, and the current stage is PID calibration for stable flight behavior.",
+        "title": "Hardware Bring-Up",
+        "text": "I designed around a custom PCB workflow, soldered SMD components by hand, wired the ESP32-S3, and iterated the board until power and control paths were reliable. This was my first time doing full SMD assembly at this scale, so getting clean joints without bridging was a huge milestone.",
         "img": "images/drone/IMG_5055-cc178b14-dcb9-490a-9693-decc7445fb78.png",
         "alt": "Custom flight-control PCB held for soldering and inspection"
       },
       {
+        "id": "b3",
+        "type": "image",
+        "title": "Component Inventory",
+        "img": "images/drone/esp32_component_inventory.svg",
+        "alt": "ESP32 drone component inventory diagram",
+        "caption": "Component inventory diagram used to map parts and quantities before assembly"
+      },
+      {
         "id": "b4",
-        "type": "img-text-right",
-        "title": "Successes and Fails",
-        "text": "I learned SMD soldering from scratch and recovered from early mistakes, including a short that damaged a LiPo pack. The biggest current issue is frame warp causing IMU tilt offset and PID over-correction, which prevents reliable untethered liftoff.",
-        "img": "images/drone/IMG_5147-305382a5-50aa-450f-8d3b-099b2d884f0c.png",
-        "alt": "Assembled drone in 3D-printed frame during testing"
+        "type": "text-only",
+        "title": "Project Progress",
+        "text": "Over the semester, I built this in stages: hardware assembly first, then firmware integration. I configured PWM output for motor commands, got reliable spin-up and throttle response, integrated the IMU for attitude sensing, and started PID tuning for stabilization. The hardware is complete and motors are functional, with final tuning still in progress.",
+        "img": null
       },
       {
         "id": "b5",
-        "type": "text-only",
-        "title": "ECE Skills Gained",
-        "text": "SMD soldering and rework (flux, hot air, wick), schematic interpretation for MOSFET/diode motor stages, PWM and I2C firmware integration, and practical PID tuning under real hardware constraints.",
-        "img": null
+        "type": "image",
+        "title": "System Architecture",
+        "img": "images/drone/esp32_system_architecture.svg",
+        "alt": "ESP32 drone system architecture block diagram",
+        "caption": "System architecture: power, sensing, control, and motor-drive data flow"
       },
       {
         "id": "b6",
         "type": "img-text-left",
-        "title": "Final Thoughts and Next Steps",
-        "text": "This project confirmed my interest in embedded systems and robotics. Next, I am focused on fixing frame flatness for stable liftoff, then extending to manual RC control and autonomy features.",
-        "img": "images/drone/IMG_5144-b93fa819-af22-4054-a67a-bea2cc2aaec2.png",
-        "alt": "ESP32 board connected to LiPo battery during bench testing"
+        "title": "Successes and Failures",
+        "text": "The hardest part was startup behavior in the motor drive path: PWM initialization had to be in the right sequence and range, or the motors would not spin. Debugging that timing took real iteration. My biggest win was getting all four motors to spin up reliably and respond consistently to control inputs.",
+        "img": "images/drone/IMG_5147-305382a5-50aa-450f-8d3b-099b2d884f0c.png",
+        "alt": "Assembled drone in 3D-printed frame during testing"
       },
       {
         "id": "b7",
         "type": "text-only",
-        "title": "Video Demo",
-        "text": "Included below in the gallery: bench test footage and current drone state.",
+        "title": "ECE Skills Gained",
+        "text": "This project gave me practical experience in embedded firmware, PCB/schematic reading, SMD soldering, PWM and I2C interfaces, and PID feedback control. It helped connect control theory and real hardware behavior in a way classes alone never could.",
         "img": null
+      },
+      {
+        "id": "b8",
+        "type": "img-text-right",
+        "title": "Final Thoughts",
+        "text": "This project confirmed that embedded systems and controls is the direction I want to keep pursuing. Next I want stable untethered flight, then wireless telemetry so I can tune PID gains in real time while testing.",
+        "img": "images/drone/IMG_5144-b93fa819-af22-4054-a67a-bea2cc2aaec2.png",
+        "alt": "ESP32 board connected to LiPo battery during bench testing"
+      },
+      {
+        "id": "b9",
+        "type": "text-only",
+        "title": "Video Demo",
+        "text": "Current bench test footage is embedded directly below.",
+        "img": null
+      },
+      {
+        "id": "b10",
+        "type": "video",
+        "title": "Drone Demo Clip",
+        "src": "images/drone/IMG_5155.mp4",
+        "caption": "Latest test video"
       }
     ],
     "longDescription": "ECE Discovery Project — a fully custom quadcopter designed from scratch, powered by an ESP32 microcontroller for flight control, PID stabilization, and real-time telemetry.",
@@ -122,11 +144,6 @@
         "src": "images/drone/IMG_5144-b93fa819-af22-4054-a67a-bea2cc2aaec2.png",
         "alt": "Powered ESP32 board and battery on test bench",
         "caption": "Bench power-up and wiring validation"
-      },
-      {
-        "src": "images/drone/IMG_5170.mp4",
-        "alt": "Drone test video",
-        "caption": "Video demo"
       }
     ]
   },
