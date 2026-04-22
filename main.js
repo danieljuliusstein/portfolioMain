@@ -461,7 +461,7 @@ function createProjectCard(project) {
 
   const hasSTL = project.stlUrl && project.stlUrl.trim() !== '';
   const thumbnailHTML = hasSTL
-    ? `<div class="project-thumbnail stl-viewer-card" data-stl="${project.stlUrl}" style="height:200px; background:#0d1117; display:flex; align-items:center; justify-content:center;">
+    ? `<div class="project-thumbnail stl-viewer-card" data-stl="${project.stlUrl}" style="height:220px; background:#0d1117; display:flex; align-items:center; justify-content:center;">
         <canvas class="stl-canvas" style="width:100%; height:100%; display:block;"></canvas>
        </div>`
     : `<img src="${project.thumbnail}" alt="${project.thumbnailAlt || 'Project screenshot'}" class="project-thumbnail" loading="lazy">`;
@@ -472,10 +472,10 @@ function createProjectCard(project) {
       <div class="project-body">
         ${project.discoveryProject ? '<span class="project-badge discovery-badge">Discovery Project</span>' : ''}
         <h3 class="project-title">${escapeHtml(project.title)}</h3>
+        <p class="project-description">${escapeHtml(project.description)}</p>
         <div class="project-tags">
           ${project.tags.map(tag => `<span class="project-tag">${escapeHtml(tag)}</span>`).join('')}
         </div>
-        <p class="project-description">${escapeHtml(project.description)}</p>
         <div class="project-actions">
           <button class="btn btn-primary view-details" aria-label="View details for ${escapeHtml(project.title)}">
             View Details

@@ -249,6 +249,16 @@ textarea:focus-visible {
   transform: scale(1.05);
 }
 
+.pp-back-btn:focus-visible,
+.btn:focus-visible,
+.btn-primary:focus-visible,
+.btn-outline:focus-visible,
+.tag-btn:focus-visible,
+.project-card:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
 /* Screen reader improvements */
 [aria-hidden="true"] {
   speak: none;
@@ -1581,17 +1591,34 @@ textarea:focus-visible {
 
 .project-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 0 0 1px var(--color-accent), var(--shadow-md);
+  border-color: var(--color-accent);
 }
 
 /* Removed polka dot pattern from project cards */
 
 .project-thumbnail {
   width: 100%;
-  height: 200px;
+  height: 220px;
   object-fit: cover;
+  overflow: hidden;
   background: var(--color-border);
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.35s ease;
+}
+
+.project-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.project-card:hover .project-thumbnail img {
+  transform: scale(1.05);
+}
+
+.project-card:hover img.project-thumbnail {
+  transform: scale(1.05);
 }
 
 .project-thumbnail[loading] {
@@ -1638,14 +1665,14 @@ textarea:focus-visible {
 .project-tag {
   font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
-  background: var(--color-bg);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 4px;
   color: var(--color-text-muted);
 }
 
 .project-description {
-  color: var(--color-text-muted);
+  color: var(--color-text);
   margin-bottom: var(--spacing-md);
   flex: 1;
 }
@@ -1653,6 +1680,11 @@ textarea:focus-visible {
 .project-actions {
   display: flex;
   gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.project-actions .btn {
+  flex: 0 0 auto;
 }
 
 .btn {
@@ -1672,7 +1704,6 @@ textarea:focus-visible {
 .btn-primary {
   background: var(--color-accent);
   color: white;
-  flex: 1;
 }
 
 .btn-primary:hover {
@@ -1685,7 +1716,6 @@ textarea:focus-visible {
   background: transparent;
   border: 1px solid var(--color-border);
   color: var(--color-text);
-  flex: 1;
 }
 
 .btn-outline:hover {
@@ -2908,7 +2938,7 @@ textarea:focus-visible {
 .pp-back-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   background: none;
   border: 1px solid var(--color-border);
   color: var(--color-text-muted);
@@ -2917,7 +2947,7 @@ textarea:focus-visible {
   padding: 0.45rem 1rem;
   border-radius: 6px;
   cursor: pointer;
-  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  transition: gap 0.2s ease, color 0.2s ease, border-color 0.2s, background 0.2s;
 }
 
 .pp-back-btn:hover {
@@ -2935,7 +2965,7 @@ textarea:focus-visible {
 
 .pp-hero-inner {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 5fr 4fr;
   gap: 3rem;
   align-items: center;
 }
@@ -2965,7 +2995,7 @@ textarea:focus-visible {
 
 .pp-description {
   font-size: 1.05rem;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   line-height: 1.7;
   margin: 0;
 }
@@ -2974,6 +3004,9 @@ textarea:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
 }
 
 .pp-actions {
@@ -3100,7 +3133,7 @@ textarea:focus-visible {
 .blocks-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2.5rem;
   padding: 1rem 0;
 }
 
@@ -3169,20 +3202,24 @@ textarea:focus-visible {
 }
 
 .block-view-title {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.2rem;
+  font-weight: 700;
   color: var(--color-accent);
   margin-bottom: 0.4rem;
 }
 
 .block-view-text {
-  color: var(--color-text-muted);
+  color: var(--color-text);
   line-height: 1.8;
   margin: 0;
 }
 
 .block-text-only {
-  max-width: 760px;
+}
+
+.block-view-figure {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 /* ================================
@@ -4180,22 +4217,24 @@ textarea:focus-visible {
 
 .block-view-heading {
   margin: 0.4rem 0 0.25rem;
-  font-size: 1.4rem;
-  color: var(--color-accent);
+  font-size: 1.05rem;
+  color: var(--color-text);
 }
 
 .block-view-quote {
-  border-left: 3px solid var(--color-accent);
-  padding-left: 0.9rem;
-  margin: 0.5rem 0;
-  color: var(--color-text-muted);
+  border-left: 4px solid var(--color-accent);
+  background: var(--color-surface);
+  padding: 1rem 1.25rem;
+  border-radius: 0 6px 6px 0;
+  margin: 1rem 0;
+  color: var(--color-text);
   font-style: italic;
 }
 
 .block-view-list {
   margin: 0.4rem 0;
   padding-left: 1.2rem;
-  color: var(--color-text-muted);
+  color: var(--color-text);
 }
 
 .block-view-caption {
@@ -4877,5 +4916,45 @@ textarea:focus-visible {
 
   .stepper-sem:last-child {
     border-bottom: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .block-layout,
+  .block-layout.img-left,
+  .block-layout.img-right {
+    grid-template-columns: 1fr;
+    direction: ltr;
+  }
+
+  .block-layout.img-right .block-img {
+    order: 0;
+  }
+
+  .block-layout.img-right .block-text {
+    order: 1;
+  }
+
+  .block-full-img img {
+    max-height: 60vh;
+    object-fit: cover;
+  }
+
+  .pp-hero-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .pp-hero-visual {
+    max-height: 240px;
+    overflow: hidden;
+  }
+
+  .project-actions {
+    flex-direction: column;
+  }
+
+  .project-actions .btn {
+    width: 100%;
+    text-align: center;
   }
 }
