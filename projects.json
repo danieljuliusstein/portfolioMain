@@ -22,40 +22,41 @@
     "sections": [
       {
         "heading": "Project Idea",
-        "content": "For my Discovery Project, I set out to build a fully functional mini drone powered by an ESP32 microcontroller. I have always been fascinated by drones and robotics, and I wanted to go beyond just flying one. I wanted to actually understand and build the hardware and software that makes it work. The project involved designing and assembling a custom PCB, soldering SMD components, wiring the ESP32, and writing firmware to control all four motors."
+        "content": "For my Discovery Project, I set out to build a fully functional mini drone powered by an ESP32 microcontroller. I've always been fascinated by drones and robotics, and I wanted to go beyond just flying one - I wanted to actually understand and build the hardware and software that makes it work. The project involved designing and assembling a custom PCB, soldering SMD components, wiring the ESP32, and writing the firmware to control four brushless motors."
       },
       {
         "heading": "Project Progress",
-        "content": "Over the semester, I worked through this in stages. First I sourced and assembled the hardware: getting the custom PCB fabricated, placing and soldering SMD components like resistors, capacitors, and motor driver circuitry, and wiring the ESP32 to the board. Next I moved into firmware. I configured the ESP32 to communicate with the motor control path using PWM signals and got the motors to arm and respond to throttle commands. After that I integrated the IMU for attitude sensing and started tuning the PID loop for stabilization. At this point the drone is mostly complete. The hardware is built, the motors are functional, and the remaining work is final tuning for stable flight."
+        "content": "Over the semester I worked through this in stages. First I sourced and assembled the hardware - this meant getting the custom PCB, placing and soldering SMD components like resistors, capacitors, and the motor drivers, and then wiring the ESP32 to the board. Next I moved into firmware - I configured the ESP32 to communicate with the ESCs (electronic speed controllers) using PWM signals, and got the motors to arm and respond to throttle commands. I then worked on integrating the IMU sensor for attitude sensing, and began tuning the PID controller for flight stabilization. The drone is mostly complete - the hardware is built and motors are functional, with minor tuning still in progress."
       },
       {
         "heading": "Successes and Failures",
-        "content": "My biggest challenge was getting the motor drive path to behave correctly at startup. The PWM initialization had to be in the right range and sequence, otherwise the motors would not spin. I spent a lot of time debugging signal timing and understanding that startup behavior in detail. On the success side, I was really proud when all four motors finally spun up reliably and responded to control input. Successfully soldering the SMD components without bridging pads was another major win for me, especially since this was my first time working at that scale."
+        "content": "My biggest challenge was getting the motors and ESCs to work correctly. ESCs need a specific PWM initialization sequence to arm - if the signal isn't in the right range at startup, the motors simply won't spin. I spent a significant amount of time debugging signal timing and understanding how the ESC protocol works. On the success side, I was really proud of getting all four motors to spin up reliably and respond to control inputs. Successfully soldering the SMD components without bridging pads was also a win - it was my first time working at that scale and required a lot of patience."
       },
       {
         "heading": "ECE Skills Gained",
-        "content": "This project touched several core ECE skills. First was embedded systems programming: I used the ESP32 Arduino framework to implement PWM output, sensor reads, and real-time control logic. Second was circuit assembly and PCB familiarity: reading the schematic, matching footprints to placements, and soldering fine-pitch SMD parts. Third was communication interfaces: PWM for motor control and I2C for IMU communication. Finally, implementing a PID loop gave me real hands-on feedback control experience beyond what I had only seen in theory before."
+        "content": "This project touched on several core ECE skills. First, embedded systems programming - I used the ESP32's Arduino framework to write firmware that handles PWM output, sensor reading, and real-time control logic. Second, circuit assembly and PCB familiarity - I learned to read the schematic, identify SMD component placements, and solder at a fine pitch. Third, communication protocols - I worked with PWM to interface with the ESCs, and I2C to communicate with the IMU. Finally, control systems - implementing a basic PID loop gave me hands-on experience with feedback control, which is a foundational ECE concept I had only seen in theory before."
       },
       {
         "heading": "Final Thoughts",
-        "content": "Overall, this project deepened my interest in embedded systems and robotics. Seeing hardware and software come together in a system that physically moves is extremely motivating to me. It confirmed that embedded and controls is the direction I want to keep pursuing. My next steps are to finish stable flight and then add wireless telemetry so I can tune PID gains in real time."
+        "content": "Overall this project deepened my interest in embedded systems and robotics - seeing hardware and software come together in something that physically moves is really motivating. It confirmed that the embedded and controls thread is the direction I want to go. I'd like to continue this project and get to stable flight, and eventually add wireless telemetry so I can tune the PID gains in real time. It's the kind of hands-on project I want to keep building on."
       }
     ],
     "blocks": [
       {
         "id": "b1",
-        "type": "text-only",
-        "title": "Project Idea",
-        "text": "For my Discovery Project, I set out to build a fully functional mini drone powered by an ESP32 microcontroller. I have always been fascinated by drones and robotics, and I wanted to go beyond just flying one. I wanted to understand and build the hardware and software that actually makes it work.",
-        "img": null
+        "type": "img-text-right",
+        "title": "Discovery Project Idea",
+        "text": "For my Discovery Project, I set out to build a fully functional mini drone powered by an ESP32 microcontroller. I've always been fascinated by drones and robotics, and I wanted to go beyond just flying one - I wanted to actually understand and build the hardware and software that makes it work. The project involved designing and assembling a custom PCB, soldering SMD components, wiring the ESP32, and writing the firmware to control four brushless motors.",
+        "img": "images/drone/IMG_5147-305382a5-50aa-450f-8d3b-099b2d884f0c.png",
+        "alt": "Assembled ESP32 mini drone in orange 3D printed frame"
       },
       {
         "id": "b2",
-        "type": "img-text-right",
-        "title": "Hardware Bring-Up",
-        "text": "I designed around a custom PCB workflow, soldered SMD components by hand, wired the ESP32-S3, and iterated the board until power and control paths were reliable. This was my first time doing full SMD assembly at this scale, so getting clean joints without bridging was a huge milestone.",
+        "type": "img-text-left",
+        "title": "Project Progress",
+        "text": "Over the semester I worked through this in stages. First I sourced and assembled the hardware - this meant getting the custom PCB, placing and soldering SMD components like resistors, capacitors, and the motor drivers, and then wiring the ESP32 to the board. Next I moved into firmware - I configured the ESP32 to communicate with the ESCs (electronic speed controllers) using PWM signals, and got the motors to arm and respond to throttle commands. I then worked on integrating the IMU sensor for attitude sensing, and began tuning the PID controller for flight stabilization. The drone is mostly complete - the hardware is built and motors are functional, with minor tuning still in progress.",
         "img": "images/drone/IMG_5055-cc178b14-dcb9-490a-9693-decc7445fb78.png",
-        "alt": "Custom flight-control PCB held for soldering and inspection"
+        "alt": "Custom PCB during soldering and firmware bring-up"
       },
       {
         "id": "b3",
@@ -63,55 +64,41 @@
         "title": "Component Inventory",
         "img": "images/drone/esp32_component_inventory.svg",
         "alt": "ESP32 drone component inventory diagram",
-        "caption": "Component inventory diagram used to map parts and quantities before assembly"
+        "caption": "Component inventory used during hardware sourcing and assembly"
       },
       {
         "id": "b4",
-        "type": "text-only",
-        "title": "Project Progress",
-        "text": "Over the semester, I built this in stages: hardware assembly first, then firmware integration. I configured PWM output for motor commands, got reliable spin-up and throttle response, integrated the IMU for attitude sensing, and started PID tuning for stabilization. The hardware is complete and motors are functional, with final tuning still in progress.",
-        "img": null
+        "type": "img-text-right",
+        "title": "Successes and Failures",
+        "text": "My biggest challenge was getting the motors and ESCs to work correctly. ESCs need a specific PWM initialization sequence to arm - if the signal isn't in the right range at startup, the motors simply won't spin. I spent a significant amount of time debugging signal timing and understanding how the ESC protocol works. On the success side, I was really proud of getting all four motors to spin up reliably and respond to control inputs. Successfully soldering the SMD components without bridging pads was also a win - it was my first time working at that scale and required a lot of patience.",
+        "img": "images/drone/IMG_5054-81d9823a-6efa-44fd-b78c-1286e83754ed.png",
+        "alt": "Flight control board in helping-hands jig during assembly"
       },
       {
         "id": "b5",
-        "type": "image",
-        "title": "System Architecture",
+        "type": "img-text-left",
+        "title": "ECE Skills Gained",
+        "text": "This project touched on several core ECE skills. First, embedded systems programming - I used the ESP32's Arduino framework to write firmware that handles PWM output, sensor reading, and real-time control logic. Second, circuit assembly and PCB familiarity - I learned to read the schematic, identify SMD component placements, and solder at a fine pitch. Third, communication protocols - I worked with PWM to interface with the ESCs, and I2C to communicate with the IMU. Finally, control systems - implementing a basic PID loop gave me hands-on experience with feedback control, which is a foundational ECE concept I had only seen in theory before.",
         "img": "images/drone/esp32_system_architecture.svg",
-        "alt": "ESP32 drone system architecture block diagram",
-        "caption": "System architecture: power, sensing, control, and motor-drive data flow"
+        "alt": "ESP32 system architecture showing IMU, control loop, and motor path"
       },
       {
         "id": "b6",
-        "type": "img-text-left",
-        "title": "Successes and Failures",
-        "text": "The hardest part was startup behavior in the motor drive path: PWM initialization had to be in the right sequence and range, or the motors would not spin. Debugging that timing took real iteration. My biggest win was getting all four motors to spin up reliably and respond consistently to control inputs.",
-        "img": "images/drone/IMG_5147-305382a5-50aa-450f-8d3b-099b2d884f0c.png",
-        "alt": "Assembled drone in 3D-printed frame during testing"
+        "type": "img-text-right",
+        "title": "Final Thoughts",
+        "text": "Overall this project deepened my interest in embedded systems and robotics - seeing hardware and software come together in something that physically moves is really motivating. It confirmed that the embedded and controls thread is the direction I want to go. I'd like to continue this project and get to stable flight, and eventually add wireless telemetry so I can tune the PID gains in real time. It's the kind of hands-on project I want to keep building on.",
+        "img": "images/drone/IMG_5144-b93fa819-af22-4054-a67a-bea2cc2aaec2.png",
+        "alt": "Bench test with ESP32 board and LiPo battery connected"
       },
       {
         "id": "b7",
-        "type": "text-only",
-        "title": "ECE Skills Gained",
-        "text": "This project gave me practical experience in embedded firmware, PCB/schematic reading, SMD soldering, PWM and I2C interfaces, and PID feedback control. It helped connect control theory and real hardware behavior in a way classes alone never could.",
-        "img": null
-      },
-      {
-        "id": "b8",
-        "type": "img-text-right",
-        "title": "Final Thoughts",
-        "text": "This project confirmed that embedded systems and controls is the direction I want to keep pursuing. Next I want stable untethered flight, then wireless telemetry so I can tune PID gains in real time while testing.",
-        "img": "images/drone/IMG_5144-b93fa819-af22-4054-a67a-bea2cc2aaec2.png",
-        "alt": "ESP32 board connected to LiPo battery during bench testing"
-      },
-      {
-        "id": "b9",
         "type": "text-only",
         "title": "Video Demo",
         "text": "Current bench test footage is embedded directly below.",
         "img": null
       },
       {
-        "id": "b10",
+        "id": "b8",
         "type": "video",
         "title": "Drone Demo Clip",
         "src": "images/drone/IMG_5155.mp4",
