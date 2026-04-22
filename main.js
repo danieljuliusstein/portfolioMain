@@ -1065,9 +1065,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize testimonials carousel
   initTestimonials();
 
-  // ECE academic year stepper (career goals)
-  initEceStepper();
-
   // Initialize featured projects - COMMENTED OUT (uncomment when you have more projects)
   // loadFeaturedProjects();
 
@@ -1302,7 +1299,7 @@ function initScrollAnimations() {
   if (prefersReducedMotion) return;
 
   // Select all sections to animate
-  const sections = document.querySelectorAll('.hero, .about-section, .career-goals-section, .projects-section, .resume-section, .testimonials-section, .contact-section');
+  const sections = document.querySelectorAll('.hero, .about-section, .projects-section, .resume-section, .testimonials-section, .contact-section');
   
   // Create intersection observer
   const observer = new IntersectionObserver((entries) => {
@@ -2263,8 +2260,6 @@ function initTerminal() {
       return `Available commands:<br>
   help        - Show this help message<br>
   about       - Learn about me<br>
-  career      - View career goals<br>
-  goals       - View career goals<br>
   projects    - View my projects<br>
   skills      - List my skills<br>
   contact     - Get contact information<br>
@@ -2277,14 +2272,6 @@ function initTerminal() {
     about: () => {
       document.querySelector('#about')?.scrollIntoView({ behavior: 'smooth' });
       return 'Navigating to about section...';
-    },
-    career: () => {
-      document.querySelector('#career-goals')?.scrollIntoView({ behavior: 'smooth' });
-      return 'Navigating to career goals...';
-    },
-    goals: () => {
-      document.querySelector('#career-goals')?.scrollIntoView({ behavior: 'smooth' });
-      return 'Navigating to career goals...';
     },
     projects: () => {
       document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' });
