@@ -2,95 +2,133 @@
   {
     "id": "esp-fly",
     "title": "ESP-FLY Mini Drone",
-    "description": "ECE Discovery Project — a fully custom quadcopter designed from scratch, powered by an ESP32 microcontroller for flight control, PID stabilization, and real-time telemetry.",
+    "description": "ECE Discovery Project: a custom micro drone built from scratch around a XIAO ESP32-S3, with custom PCB hardware, 3D-printed frame, and PID flight-control firmware.",
     "discoveryProject": true,
     "tags": [
-      "C/C++",
-      "ESP32",
+      "ESP32-S3",
       "Embedded Systems",
+      "PCB Design",
       "PID Control",
-      "CAD",
+      "3D Printing",
       "ECE Discovery"
     ],
-    "thumbnail": "images/portfolioImage.png",
-    "thumbnailAlt": "ESP-FLY mini drone 3D model render",
-    "image": "",
-    "imageAlt": "ESP-FLY mini drone build and 3D printed frame",
+    "thumbnail": "images/drone/IMG_5147-305382a5-50aa-450f-8d3b-099b2d884f0c.png",
+    "thumbnailAlt": "ESP-FLY drone assembled in orange 3D-printed frame",
+    "image": "images/drone/IMG_5055-cc178b14-dcb9-490a-9693-decc7445fb78.png",
+    "imageAlt": "Custom drone control PCB under soldering setup",
     "stlUrl": "/ESP-FLYv13.stl",
     "demoUrl": "",
     "repoUrl": "",
     "sections": [
       {
-        "heading": "Background & Motivation",
-        "content": "I chose to build a drone from scratch because it sits at the exact intersection of everything that drew me to electrical and computer engineering: real-time embedded software, control theory, power electronics, and mechanical design all have to work together simultaneously, or the thing falls out of the sky. There is no hiding behind a simulation. When I started ECE 1100, I wanted a project that would force me to learn the full hardware-software stack rather than stay comfortable on either side of it. Drones are also a domain where the feedback loop is immediate and physical — you can see exactly what your code is doing, which makes debugging deeply satisfying and occasionally humbling.\n\nThe ESP32 was a deliberate choice over more common flight controller platforms like Betaflight or ArduPilot. Using a general-purpose microcontroller meant I had to implement flight control logic myself rather than configure existing firmware. That constraint was the whole point. I wanted to understand what is actually happening inside a flight controller — how sensor data flows from an IMU into a PID loop and out to motor commands — rather than treat it as a black box. The ESP-FLY project is my answer to the question: can a first-year ECE student build something that actually flies, starting from a blank PCB schematic and a spool of filament?"
+        "heading": "Project Idea",
+        "content": "I set out to build a mini drone from scratch using an ESP32 microcontroller because I wanted a true end-to-end hardware/software challenge. Instead of using an off-the-shelf flight stack, I focused on learning the fundamentals myself: component selection, board assembly, embedded firmware, and control loops. The build combines a custom PCB order from JLCPCB, a 3D-printed frame, and full manual assembly while staying under a total project cost of about $40."
       },
       {
-        "heading": "Approach & Methods",
-        "content": "The system is built around an ESP32 development board running custom firmware written in C++. The core architecture has three layers: sensor acquisition, state estimation, and motor control. For sensing, I integrated an MPU-6050 IMU over I2C, which provides 3-axis accelerometer and gyroscope readings at up to 1kHz. Raw IMU data is noisy and needs to be fused — I implemented a complementary filter to combine the fast-responding gyroscope with the drift-correcting accelerometer to produce stable roll, pitch, and yaw estimates.\n\nThe frame was designed entirely in CAD and 3D-printed in PLA. The geometry went through 13 major revisions (hence v13 in the filename) to optimize arm rigidity, motor mount angle, and center-of-mass placement. Each print iteration revealed a new tradeoff: stiffer arms reduce vibration but add weight; shorter arms improve agility but reduce stability. The current frame keeps the total weight — including battery and electronics — under 120g, which is the threshold I set for the motors I selected.\n\nMotor control uses four brushless DC motors driven by 10A ESCs communicating over a standard PWM protocol. The flight controller outputs throttle commands to each ESC at 250Hz, fast enough to correct for attitude disturbances before they compound into instability."
+        "heading": "Project Progress",
+        "content": "I sourced and integrated all core parts: XIAO ESP32-S3, MPU6050 IMU, SI2300 MOSFETs, diodes, SMD resistors/capacitors/LEDs, coreless motors, and a LiPo battery. After hardware assembly, I moved into firmware by configuring PWM motor outputs and I2C IMU communication. The firmware loop is running, motors respond to control input, and current work is focused on PID calibration for stable takeoff."
       },
       {
-        "heading": "Implementation",
-        "content": "The hardest problem I encountered was vibration. Brushless motors at flight speed create high-frequency vibrations that contaminate the IMU readings and make the gyroscope output look like the drone is tumbling when it is hovering steadily. I solved this in two ways: mechanically, by mounting the flight controller board on small silicone dampers to decouple it from the frame; and in software, by applying a low-pass filter to the gyroscope data before it enters the PID loop.\n\nPID tuning was the other major challenge. A PID controller has three terms — proportional, integral, and derivative — and getting the gains right requires iterative testing. Too much proportional gain and the drone oscillates violently; too little and it drifts. I started with conservative gains and incremented them manually, tethering the drone to a test rig to prevent crashes during tuning. This process taught me more about control systems in two weekends than a semester of reading could have.\n\nOn the software side, the ESP32 runs a main loop that reads the IMU, computes the filter output, runs three independent PID controllers (one per axis), mixes the outputs into per-motor throttle values, and writes to the ESCs — all within a 4ms cycle time to maintain 250Hz update rate. Managing timing and avoiding blocking operations in the loop was a real embedded systems challenge that required careful use of hardware timers."
+        "heading": "Successes and Failures",
+        "content": "A major early challenge was first-time SMD soldering with 0805 parts, where I learned practical rework techniques using flux, hot air, and solder wick. I also had a first-power failure that shorted the circuit and damaged a LiPo, which reinforced the habit of continuity testing before power-up. The biggest remaining blocker is frame warp: small geometry tilt introduces IMU offset, causing PID over-correction and unstable liftoff. Even with setbacks, the full hardware stack is assembled and functional from zero prior soldering experience."
       },
       {
-        "heading": "Results",
-        "content": "As of the current build, the drone achieves stable hover on a tethered test rig with active PID stabilization on the roll and pitch axes. The complementary filter produces clean attitude estimates with less than 2 degrees of drift over a 30-second hover. The 3D-printed frame (v13) has survived repeated crash-landings during tuning without structural failure, validating the design choices around arm thickness and joint geometry.\n\nThe firmware successfully runs the full sensor-to-motor loop at 250Hz on the ESP32 without missing cycles, demonstrating that a general-purpose microcontroller is capable of meeting real-time flight control timing requirements. The project has produced a fully custom flight controller, a functional CAD model of the frame, and a documented codebase that implements complementary filtering and PID control from scratch."
+        "heading": "ECE Skills Gained",
+        "content": "This project gave me hands-on experience with SMD assembly, schematic interpretation, embedded communication, and control systems integration. I used PWM for motor control, I2C for IMU data, and closed-loop PID logic for stabilization behavior. It also strengthened debugging discipline across mechanical, electrical, and software layers in a single system."
       },
       {
-        "heading": "Lessons Learned",
-        "content": "This project taught me that embedded systems engineering is fundamentally about managing constraints simultaneously. You cannot optimize for one thing in isolation — every decision about weight, update rate, filtering, or power budget interacts with every other decision. That systems-thinking mindset is the most transferable thing I have taken from this project.\n\nTechnically, I went from having never written interrupt-driven firmware to understanding I2C communication, PWM generation, complementary filters, and real-time scheduling. I also learned CAD iteration discipline: each version of the frame taught me something specific, and documenting what changed and why made each iteration more productive than the last.\n\nProfessionally, I learned that the most useful debugging skill is building observable systems. When I added serial logging to print IMU readings and PID outputs in real time, problems that had been invisible became immediately obvious. Building in observability from the start — not as an afterthought — is something I will carry into every future hardware project."
-      },
-      {
-        "heading": "Future Work",
-        "content": "The immediate next step is untethered flight, which requires finalizing yaw control and verifying battery endurance at hover throttle. After stable free flight is achieved, I plan to add an RC receiver so the drone can be manually piloted, then layer autonomous features on top of that baseline.\n\nLonger term, I want to add a downward-facing optical flow sensor for position hold without GPS — a harder problem than attitude stabilization because it requires integrating velocity estimates over time. I am also interested in adding a lightweight FPV camera and video transmitter, which introduces new challenges around RF interference with the control electronics.\n\nBeyond the hardware, I plan to open-source the firmware and CAD files so other ECE students can build on this work. The 3D model visible on this page is the actual frame geometry — the same file that gets sliced and printed."
+        "heading": "Final Thoughts",
+        "content": "This has been one of my hardest and most rewarding builds so far. Going from no soldering experience to a functioning embedded flight platform confirmed how much I enjoy the hardware side of ECE. My next milestone is stable untethered liftoff by improving frame flatness and tuning, then exploring autonomy features after reliable manual control."
       }
     ],
     "blocks": [
       {
         "id": "b1",
         "type": "text-only",
-        "title": "Background & Motivation",
-        "text": "I chose to build a drone because it is exactly what I imagined computer engineering/programming was as a kid. Taking components and building something from scratch was always so cool to me. The reason I chose to make this was because I wanted a project that would force me to learn the full hardware-software stack rather than stay comfortable on either side of it. Drones are also a domain where the feedback loop is immediate and physical — you can see exactly what your code is doing, which makes debugging deeply satisfying and occasionally humbling. I learned so much from this project and so happy I chose it. ",
+        "title": "Project Idea",
+        "text": "Built a mini drone from scratch around the XIAO ESP32-S3 to learn the full hardware/software stack end-to-end. I designed around a custom PCB + 3D-printed frame workflow and kept total cost under about $40.",
         "img": null
       },
       {
         "id": "b2",
-        "type": "text-only",
-        "title": "Approach & Methods",
-        "text": "The system is built around an ESP32 development board. For sensing, I integrated an MPU-6050 IMU over I2C, which provides 3-axis accelerometer and gyroscope readings at up to 1kHz. The frame was designed entirely in CAD and 3D-printed in PLA. The current frame keeps the total weight including battery and electronics under 120g, which is the threshold I set for the motors I selected. Motor control uses four brushless DC motors driven by 10A ESCs communicating over a standard PWM protocol. The flight controller outputs throttle commands to each ESC at 250Hz.",
-        "img": null
+        "type": "img-text-right",
+        "title": "Parts and Assembly",
+        "text": "Key components include the XIAO ESP32-S3, MPU6050 IMU, SI2300 MOSFETs, diodes, SMD passives, coreless motors, and a LiPo battery. I sourced everything individually, then assembled and reworked the board by hand.",
+        "img": "images/drone/IMG_5051-243dfd83-9f69-4fdd-bcea-58157e7725c7.png",
+        "alt": "Labeled spread of ESP32 drone components"
       },
       {
         "id": "b3",
-        "type": "text-only",
-        "title": "Implementation",
-        "text": "The biggest hurdle was definitely the soldering. Since this was my first time ever working with electronic circuitry, trying to attach SMD components to the board was a massive learning curve. Getting the solder to flow correctly on those tiny contact points was incredibly frustrating—I actually had to scrap my first attempt and redo the entire board from scratch to get it right",
-        "img": null
+        "type": "img-text-left",
+        "title": "Firmware Progress",
+        "text": "After assembly, I implemented PWM motor output and I2C IMU reads on the ESP32. The motors spin and respond to commands, and the current stage is PID calibration for stable flight behavior.",
+        "img": "images/drone/IMG_5055-cc178b14-dcb9-490a-9693-decc7445fb78.png",
+        "alt": "Custom flight-control PCB held for soldering and inspection"
       },
       {
         "id": "b4",
-        "type": "text-only",
-        "title": "Results",
-        "text": "The drone is currently achieving a stable hover on a tethered rig using PID stabilization. By implementing and tuning existing libraries for the complementary filter, I’ve managed to get clean attitude estimates with less than 2 degrees of drift. The 3D-printed frame has proven to be really durable, surviving several rough landings during the tuning process without any breaks. On the software side, I successfully configured the ESP32 to run the sensor-to-motor loop at 250Hz. The project resulted in a functional hardware build, a custom-designed CAD frame, and a working firmware setup that integrates complex control loops and sensor fusion.",
-        "img": null
+        "type": "img-text-right",
+        "title": "Successes and Fails",
+        "text": "I learned SMD soldering from scratch and recovered from early mistakes, including a short that damaged a LiPo pack. The biggest current issue is frame warp causing IMU tilt offset and PID over-correction, which prevents reliable untethered liftoff.",
+        "img": "images/drone/IMG_5147-305382a5-50aa-450f-8d3b-099b2d884f0c.png",
+        "alt": "Assembled drone in 3D-printed frame during testing"
       },
       {
         "id": "b5",
         "type": "text-only",
-        "title": "Lessons Learned",
-        "text": "This project shifted my entire perspective on engineering. I realized that building an embedded system is really a balancing act; you can’t change the weight or the motor speed without affecting everything else. That kind of \"systems thinking\" is the most valuable skill I’ve gained. On the technical side, I went from zero experience to understanding I2C communication, PWM, and real-time firmware. I also learned the importance of \"observability\"—once I started logging real-time data from the sensors, debugging went from guesswork to logic. Building tools to see what the code is doing is something I’ll do for every project from now on.",
+        "title": "ECE Skills Gained",
+        "text": "SMD soldering and rework (flux, hot air, wick), schematic interpretation for MOSFET/diode motor stages, PWM and I2C firmware integration, and practical PID tuning under real hardware constraints.",
         "img": null
       },
       {
         "id": "b6",
+        "type": "img-text-left",
+        "title": "Final Thoughts and Next Steps",
+        "text": "This project confirmed my interest in embedded systems and robotics. Next, I am focused on fixing frame flatness for stable liftoff, then extending to manual RC control and autonomy features.",
+        "img": "images/drone/IMG_5144-b93fa819-af22-4054-a67a-bea2cc2aaec2.png",
+        "alt": "ESP32 board connected to LiPo battery during bench testing"
+      },
+      {
+        "id": "b7",
         "type": "text-only",
-        "title": "Future Work",
-        "text": "The next goal is to get the drone off the tether for a full free flight, which means fine-tuning the yaw control and testing the battery life. Once it’s stable on its own, I want to add an RC receiver for manual control. Looking further ahead, I’m excited to try adding an optical flow sensor for position holding and an FPV camera for a pilot's-eye view. I also plan to open-source all my CAD files and code so other students can use this as a jumping-off point for their own builds.",
+        "title": "Video Demo",
+        "text": "Included below in the gallery: bench test footage and current drone state.",
         "img": null
       }
     ],
     "longDescription": "ECE Discovery Project — a fully custom quadcopter designed from scratch, powered by an ESP32 microcontroller for flight control, PID stabilization, and real-time telemetry.",
-    "carouselImages": []
+    "carouselImages": [
+      {
+        "src": "images/drone/IMG_5051-243dfd83-9f69-4fdd-bcea-58157e7725c7.png",
+        "alt": "Labeled ESP32 mini-drone component layout",
+        "caption": "Parts kit and component planning"
+      },
+      {
+        "src": "images/drone/IMG_5054-81d9823a-6efa-44fd-b78c-1286e83754ed.png",
+        "alt": "Drone controller PCB held in helping hands jig",
+        "caption": "Custom PCB during soldering and bring-up"
+      },
+      {
+        "src": "images/drone/IMG_5055-cc178b14-dcb9-490a-9693-decc7445fb78.png",
+        "alt": "Rear side of compact flight-control board in solder station",
+        "caption": "Board rework and inspection"
+      },
+      {
+        "src": "images/drone/IMG_5147-305382a5-50aa-450f-8d3b-099b2d884f0c.png",
+        "alt": "Assembled micro-drone frame with mounted electronics",
+        "caption": "Integrated frame and drivetrain test fit"
+      },
+      {
+        "src": "images/drone/IMG_5144-b93fa819-af22-4054-a67a-bea2cc2aaec2.png",
+        "alt": "Powered ESP32 board and battery on test bench",
+        "caption": "Bench power-up and wiring validation"
+      },
+      {
+        "src": "images/drone/IMG_5170.mp4",
+        "alt": "Drone test video",
+        "caption": "Video demo"
+      }
+    ]
   },
   {
     "id": "EduAlign",

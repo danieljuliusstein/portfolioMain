@@ -2704,6 +2704,7 @@ function renderProjectPage(project) {
 function renderProjectCarousel(project) {
   const slides = project.carouselImages;
   if (!Array.isArray(slides) || slides.length === 0) return '';
+  const isVideoSlide = (src) => /\.(mp4|mov|webm|ogg)$/i.test(String(src || ''));
 
   const dots = slides
     .map(
@@ -2714,15 +2715,20 @@ function renderProjectCarousel(project) {
 
   const slideHtml = slides
     .map(
-      (slide, i) => `
+      (slide, i) => {
+        const mediaHtml = isVideoSlide(slide.src)
+          ? `<video src="${slide.src}" class="pp-carousel-img" controls preload="metadata" playsinline></video>`
+          : `<img src="${slide.src}" alt="${escapeHtml(slide.alt || 'Gallery image')}" class="pp-carousel-img" loading="lazy" decoding="async">`;
+        return `
     <div class="pp-carousel-slide" data-carousel-slide="${i}" aria-hidden="${i === 0 ? 'false' : 'true'}">
       <figure class="pp-carousel-figure">
         <div class="pp-carousel-img-wrap">
-          <img src="${slide.src}" alt="${escapeHtml(slide.alt || 'Gallery image')}" class="pp-carousel-img" loading="lazy" decoding="async">
+          ${mediaHtml}
         </div>
         ${slide.caption ? `<figcaption class="pp-carousel-caption">${escapeHtml(slide.caption)}</figcaption>` : ''}
       </figure>
-    </div>`
+    </div>`;
+      }
     )
     .join('');
 
@@ -2730,10 +2736,10 @@ function renderProjectCarousel(project) {
   const carouselMod = isSingle ? ' pp-carousel--single' : '';
 
   return `
-    <section class="pp-carousel-section" aria-label="Image gallery">
+    <section class="pp-carousel-section" aria-label="Project media gallery">
       <div class="pp-carousel-section-head">
         <h2 class="pp-carousel-heading">Gallery</h2>
-        ${!isSingle ? `<p class="pp-carousel-sub">${slides.length} images — use arrows or dots to browse</p>` : ''}
+        ${!isSingle ? `<p class="pp-carousel-sub">${slides.length} items — use arrows or dots to browse</p>` : ''}
       </div>
       <div class="pp-carousel${carouselMod}" data-pp-carousel tabindex="0" role="region" aria-roledescription="carousel">
         <div class="pp-carousel-row">
