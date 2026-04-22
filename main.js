@@ -2844,7 +2844,7 @@ function renderBlockView(block) {
       </figure>`;
     case 'video':
       return `<figure class="block-view-figure">
-        <video src="${block.src || ''}" class="pp-carousel-img" controls preload="metadata" playsinline></video>
+        <video src="${block.src || ''}" class="block-view-video" controls preload="metadata" playsinline></video>
         ${block.caption ? `<figcaption class="block-view-caption">${escapeHtml(block.caption)}</figcaption>` : ''}
       </figure>`;
     case 'img-text-left':
