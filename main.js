@@ -2002,7 +2002,7 @@ function initTypingAnimation() {
   if (!typingElement || !subtitleElement) return;
 
   // Single phrase — your professional identity, front and center
-  const finalText = 'I build things. Sometimes they work.';
+  const finalText = 'Professional problem creator. Occasional solver.';
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
